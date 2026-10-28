@@ -1,0 +1,51 @@
+Warning: no pthread_create call found: nothing to analyse
+HT-Compass 1.0.0 - tests/opt/unroll_licm.c
+Topology : 4 core(s), 8 logical CPU(s) [user]; L1D 48.0 KiB, L2 2.0 MiB
+Threads  : 0 (from 0 creation site(s))
+
+AI: local model '(reply file)' via Ollama ? (127.0.0.1:11434)
+    asked with 3444 characters; the model answered with 792 characters in 0.0 s (0 tokens)
+    proposals: 4 total, 2 supported (2 matched a place in the program), 1 unsupported, 1 invalid, 0 duplicate
+    (the reply came from a file: a test hook, not real inference)
+Optimization: 2 change(s) applied
+  unsupported strength_reduction strength_reduction proposed for main/L3   [model]
+           proposed, but this compiler has no implementation of 'strength_reduction'
+  invalid     interchange interchange proposed for main/L9   [model]
+           unknown region 'main/L9' (not in the REGIONS list)
+  passed      licm        move 1 loop-invariant computation(s) out of the loop over 'i' (line 23) in main   [model]
+           measured 1.29x best-of-15 (0.089 s to 0.068 s, median 1.31x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 9750010, operations 504000579 to 216000387, contention 0.0 to 0.0
+  passed      unrolling   unroll the loop over 'i' (line 23, 3000003 iterations) in main   [model]
+           measured 1.40x best-of-15 (0.088 s to 0.063 s, median 1.35x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 9750010, operations 504000579 to 504000579, contention 0.0 to 0.0
+  passed      interchange swap the loops over 'r' and 'i' (lines 22 and 23) in main
+           measured 1.21x best-of-9 (0.097 s to 0.080 s, median 1.21x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 1875002, operations 504000579 to 513000564, contention 0.0 to 0.0
+  rejected    unrolling   unroll the loop over 'i' (line 18, 3000003 iterations) in main
+           measured 1.00x best-of-9 (median 0.97x, 0.087 s to 0.086 s); 1.03x is needed
+  applied     licm        move 1 loop-invariant computation(s) out of the loop over 'r' (line 22) in main
+           measured 1.38x best-of-15 (0.084 s to 0.061 s, median 1.34x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 9750010, operations 504000579 to 216000303, contention 0.0 to 0.0
+  passed      unrolling   unroll the loop over 'i' (line 23, 3000003 iterations) in main   [model]
+           measured 1.11x best-of-15 (0.063 s to 0.057 s, median 1.06x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 9750010, operations 216000303 to 216000303, contention 0.0 to 0.0
+  applied     interchange swap the loops over 'r' and 'i' (lines 22 and 23) in main
+           measured 1.88x best-of-15 (0.068 s to 0.036 s, median 1.89x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 9750010 to 1875002, operations 216000303 to 225000288, contention 0.0 to 0.0
+  rejected    unrolling   unroll the loop over 'r' (line 23, 8 iterations) in main   [model]
+           measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed
+  rejected    promotion   keep a[i] in a register across the loop over 'r' (line 23) in main
+           measured 1.00x best-of-15 (median 0.96x, 0.040 s to 0.040 s); 1.03x is needed
+  rejected    promotion   keep b[i] in a register across the loop over 'r' (line 23) in main
+           measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed
+  rejected    promotion   keep c[i] in a register across the loop over 'r' (line 23) in main
+           measured 1.01x best-of-15 (median 0.99x, 0.040 s to 0.040 s); 1.03x is needed
+  end to end: 0.096 s to 0.040 s  (2.39x)
+
+No pthread_create calls found; nothing to optimize.
+
+Wrote examples/ai_demo_gen.c and examples/ai_demo.htmeta.json
+
+real	0m46.309s
+user	0m30.242s
+sys	0m14.998s

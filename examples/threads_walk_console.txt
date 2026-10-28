@@ -1,0 +1,29 @@
+HT-Compass 1.0.0 - tests/opt/threads_walk.c
+Topology : 4 core(s), 8 logical CPU(s) [user]; L1D 48.0 KiB, L2 2.0 MiB
+Threads  : 2 (from 2 creation site(s))
+
+Optimization: 2 change(s) applied
+  applied  interchange swap the loops over 'j' and 'i' (lines 19 and 20) in w1
+           measured 1.38x best-of-15 (0.073 s to 0.053 s, median 1.44x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 12960000 to 7290000, operations 42130854 to 42130854, contention 61.9 to 52.7
+  passed   interchange swap the loops over 'j' and 'i' (lines 31 and 32) in w2
+           measured 1.40x best-of-15 (0.076 s to 0.054 s, median 1.43x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 12960000 to 7290000, operations 42130854 to 42130854, contention 61.9 to 50.0
+  applied  interchange swap the loops over 'j' and 'i' (lines 31 and 32) in w2
+           measured 1.69x best-of-15 (0.052 s to 0.031 s, median 1.69x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 7290000 to 1620000, operations 42130854 to 42130854, contention 52.7 to 50.0
+  end to end: 0.074 s to 0.032 s  (2.31x)
+
+  id  thread                 class                                  ops     bw footprint
+  T0  w1                     memory-bound                       1.9e+07   0.67  49.4 MiB
+  T1  w2                     memory-bound                       2.3e+07   0.57  49.4 MiB
+
+Contention scores (0-100, higher = worse when sharing a core):
+  T0-T1   50.0  high    memory bandwidth: both threads stream data from beyond the L2 cache
+
+Mapping (optimized, exact-dp):
+  core 0 (CPU 0 4): T0 w1 + T1 w2
+
+Predicted total contention: naive 50.0 -> optimized 50.0  (0% lower)   [worst case 50.0]
+
+Wrote examples/threads_walk_gen.c and examples/threads_walk.htmeta.json

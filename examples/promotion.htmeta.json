@@ -1,0 +1,368 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/opt/promotion.c",
+  "topology": {
+    "source": "user",
+    "smt_detected": true,
+    "cores": 4,
+    "logical_cpus": 8,
+    "l1d_bytes": 49152,
+    "l2_bytes": 2097152,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7]
+    ]
+  },
+  "program": {
+    "thread_sites": 0,
+    "threads": 0,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [],
+  "contention_pairs": [],
+  "high_contention_pairs": [],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "pack",
+    "naive_total": 0.0000,
+    "optimized_total": 0.0000,
+    "worst_total": 0.0000,
+    "predicted_reduction_vs_naive_percent": 0.0000,
+    "emitted": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "optimized": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "naive": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    }
+  },
+  "optimization": {
+    "plan_only": false,
+    "settings": {
+      "fp_reassociation_allowed": false,
+      "differential_test": true,
+      "benchmark_selection": true,
+      "min_speedup": 1.0300,
+      "benchmark_runs": 5,
+      "random_data_seeds": 2
+    },
+    "c_compiler_available": true,
+    "baseline_runs_cleanly": true,
+    "applied": 1,
+    "model_before": {
+      "operations": 963988702.0000,
+      "loads": 311561102.0000,
+      "stores": 104258700.0000,
+      "estimated_dram_lines": 104030606.2500,
+      "strided_accesses": 90922500.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 1796233552.0000
+    },
+    "model_after": {
+      "operations": 1054710502.0000,
+      "loads": 311561102.0000,
+      "stores": 104258700.0000,
+      "estimated_dram_lines": 24473475.0000,
+      "strided_accesses": 0.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 1250498302.0000
+    },
+    "end_to_end_timing": {
+      "original_seconds": 0.0706,
+      "optimized_seconds": 0.0563,
+      "speedup": 1.2539
+    },
+    "candidates": [
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 25,
+        "description": "swap the loops over 'j' and 'k' (lines 25 and 26) in main",
+        "explanation": "The inner loop currently walks arrays with a large stride (90.9 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 104.0 million to 24.5 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 963988702.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 104030606.2500,
+            "strided_accesses": 90922500.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1796233552.0000
+          },
+          "after": {
+            "operations": 1054710502.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 24473475.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1250498302.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0730,
+          "candidate_seconds": 0.0584,
+          "speedup": 1.2503,
+          "speedup_median": 1.2747,
+          "runs": 15
+        },
+        "code": {
+          "before": "int main(void) {\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 450; k++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n",
+          "after": "int main(void) {\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (k = 0; k < 450; k++) {\n            for (j = 0; j < 450 - 1; j++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "fusion",
+        "function": "main",
+        "line": 24,
+        "description": "fuse the loops at lines 24 and 31 in main",
+        "explanation": "Both loops cover the same range and use the same arrays. Fusing them lets each element be reused while it is still in cache (estimated memory lines 104.0 million to 104.0 million, operations 964.0 million to 964.0 million).",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 0.97x best-of-15 (median 1.00x, 0.071 s to 0.073 s); 1.03x is needed",
+        "legality_evidence": "identical iteration space; checked 0 array pair(s) across the two loops, every shared element is reached by loop 1 no later than by loop 2",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 963988702.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 104030606.2500,
+            "strided_accesses": 90922500.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1796233552.0000
+          },
+          "after": {
+            "operations": 963987352.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 104030606.2500,
+            "strided_accesses": 90922500.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1796232202.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0709,
+          "candidate_seconds": 0.0729,
+          "speedup": 0.9724,
+          "speedup_median": 0.9976,
+          "runs": 15
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "promotion",
+        "function": "main",
+        "line": 26,
+        "description": "keep c[i][j] in a register across the loop over 'k' (line 26) in main",
+        "explanation": "The element is the same on every iteration, so it can live in a register: loads drop from 311.6 million to 220.8 million and stores from 104.3 million to 13.5 million.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.01x best-of-15 (median 1.00x, 0.069 s to 0.068 s); 1.03x is needed",
+        "legality_evidence": "c[i][j] is the same element on every iteration; no other element of 'c' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 450 time(s) so the element is certainly accessed",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 963988702.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 104030606.2500,
+            "strided_accesses": 90922500.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1796233552.0000
+          },
+          "after": {
+            "operations": 782547802.0000,
+            "loads": 220840652.0000,
+            "stores": 13538250.0000,
+            "estimated_dram_lines": 104030606.2500,
+            "strided_accesses": 90922500.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1614792652.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0687,
+          "candidate_seconds": 0.0683,
+          "speedup": 1.0055,
+          "speedup_median": 0.9986,
+          "runs": 15
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 18,
+        "description": "swap the loops over 'i' and 'j' (lines 18 and 19) in main",
+        "safety": "exact",
+        "status": "skipped",
+        "reason": "legal, but the locality analysis expects no gain",
+        "legality_evidence": "checked 2 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 24,
+        "description": "swap the loops over 'i' and 'j' (lines 24 and 25) in main",
+        "safety": "exact",
+        "status": "skipped",
+        "reason": "legal, but the locality analysis expects no gain",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0,2)",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 31,
+        "description": "swap the loops over 'i' and 'j' (lines 31 and 32) in main",
+        "safety": "exact",
+        "status": "skipped",
+        "reason": "legal, but the locality analysis expects no gain",
+        "legality_evidence": "checked 2 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0,2)",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 32,
+        "description": "swap the loops over 'j' and 'k' (lines 32 and 33) in main",
+        "explanation": "Swapping the loops can make the innermost loop walk memory sequentially.",
+        "safety": "refused",
+        "status": "rejected",
+        "reason": "not provably safe: dependence between d[i][(j+1)] and d[i][j] would be reversed",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 1,
+        "transformation": "fusion",
+        "function": "main",
+        "line": 18,
+        "description": "fuse the loops at lines 18 and 24 in main",
+        "explanation": "Both loops cover the same range and use the same arrays; fusing them reuses data while it is still in cache and removes one loop's overhead.",
+        "safety": "refused",
+        "status": "rejected",
+        "reason": "not provably safe: cannot prove a[i][j] (loop 1) and a[i][k] (loop 2) independent",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 2,
+        "transformation": "promotion",
+        "function": "main",
+        "line": 26,
+        "description": "keep a[i][k] in a register across the loop over 'j' (line 26) in main",
+        "explanation": "The element is the same on every iteration, so it can live in a register: loads drop from 311.6 million to 220.8 million and stores from 104.3 million to 104.3 million.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.01x best-of-15 (median 1.02x, 0.056 s to 0.056 s); 1.03x is needed",
+        "legality_evidence": "a[i][k] is the same element on every iteration; no other element of 'a' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 449 time(s) so the element is certainly accessed",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 1054710502.0000,
+            "loads": 311561102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 24473475.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1250498302.0000
+          },
+          "after": {
+            "operations": 963990502.0000,
+            "loads": 220841102.0000,
+            "stores": 104258700.0000,
+            "estimated_dram_lines": 24473475.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 1159778302.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0564,
+          "candidate_seconds": 0.0558,
+          "speedup": 1.0092,
+          "speedup_median": 1.0222,
+          "runs": 15
+        }
+      }
+    ]
+  },
+  "warnings": [
+    "no pthread_create call found: nothing to analyse"
+  ]
+}

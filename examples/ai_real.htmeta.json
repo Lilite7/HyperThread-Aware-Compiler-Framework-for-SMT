@@ -1,0 +1,617 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/opt/threads_walk.c",
+  "topology": {
+    "source": "user",
+    "smt_detected": true,
+    "cores": 4,
+    "logical_cpus": 8,
+    "l1d_bytes": 49152,
+    "l2_bytes": 2097152,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7]
+    ]
+  },
+  "program": {
+    "thread_sites": 2,
+    "threads": 2,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [
+    {
+      "id": 0,
+      "name": "w1",
+      "worker": "w1",
+      "create_line": 41,
+      "handle": "t",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 0,
+      "assigned_cpu": 0,
+      "profile": {
+        "int_ops": 6483600.0000,
+        "fp_ops": 3240000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 3240000.0000,
+        "stores": 3240000.0000,
+        "branches": 811800.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 17015400.0000,
+        "estimated_dram_lines": 810000.0000,
+        "working_set_bytes": 51840000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 0.0000,
+          "strided": 6480000.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.3810,
+          "floating_point": 0.1904,
+          "heavy_math": 0.0000,
+          "load_store": 0.3808,
+          "memory_bandwidth": 0.7617
+        }
+      },
+      "arrays": [
+        {
+          "name": "a1",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 3240000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 25920000.0000
+        },
+        {
+          "name": "b1",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 0.0000,
+          "writes": 3240000.0000,
+          "footprint_bytes": 25920000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 1,
+      "name": "w2",
+      "worker": "w2",
+      "create_line": 42,
+      "handle": "t",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 1,
+      "end_event": 2,
+      "assigned_core": 0,
+      "assigned_cpu": 4,
+      "profile": {
+        "int_ops": 6483600.0000,
+        "fp_ops": 6480000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 3240000.0000,
+        "stores": 3240000.0000,
+        "branches": 3241800.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 22685400.0000,
+        "estimated_dram_lines": 810000.0000,
+        "working_set_bytes": 51840000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 6480000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2858,
+          "floating_point": 0.2856,
+          "heavy_math": 0.0000,
+          "load_store": 0.2856,
+          "memory_bandwidth": 0.5713
+        }
+      },
+      "arrays": [
+        {
+          "name": "a2",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 3240000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 25920000.0000
+        },
+        {
+          "name": "b2",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 0.0000,
+          "writes": 3240000.0000,
+          "footprint_bytes": 25920000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    }
+  ],
+  "contention_pairs": [
+    {
+      "a": 0,
+      "b": 1,
+      "score": 47.6218,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.2667,
+        "load_store": 0.2856,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5713,
+        "overlap_factor": 0.8750,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 98.9 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units"
+      ]
+    }
+  ],
+  "high_contention_pairs": [
+    [0, 1]
+  ],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "pack",
+    "naive_total": 47.6218,
+    "optimized_total": 47.6218,
+    "worst_total": 47.6218,
+    "predicted_reduction_vs_naive_percent": 0.0000,
+    "emitted": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 47.6218,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 47.6218,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    },
+    "optimized": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 47.6218,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 47.6218,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    },
+    "naive": {
+      "algorithm": "creation-order",
+      "predicted_total_contention": 47.6218,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 47.6218,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    }
+  },
+  "optimization": {
+    "plan_only": false,
+    "settings": {
+      "fp_reassociation_allowed": false,
+      "differential_test": true,
+      "benchmark_selection": false,
+      "min_speedup": 1.0300,
+      "benchmark_runs": 5,
+      "random_data_seeds": 2
+    },
+    "ai": {
+      "mode": "local-model",
+      "available": true,
+      "failed": false,
+      "model": "gemma3-270m-base-local:latest",
+      "endpoint": "127.0.0.1:11434",
+      "ollama_version": "0.40.10",
+      "installed_models": [
+        "gemma3-270m-base-local:latest"
+      ],
+      "request": {
+        "prompt_characters": 4215
+      },
+      "response": {
+        "characters": 15003,
+        "seconds": 65.5310,
+        "prompt_tokens": 1396,
+        "generated_tokens": 1536,
+        "cut_off_at_token_limit": true,
+        "excerpt": "{\n    \"proposals\": [\n        {\n            \"transformation\": \"region\",\n            \"region\": \"L1\",\n            \"parameters\": {\n                \"transformation\": \"region\",\n                \"region\": \"L2\",\n                \"parameters\": {\n                    \"transformation\": \"region\",\n                    \"region\": \"L3\",\n                    \"parameters\": {\n                        \"transformation\": \"region\",\n                        \"region\": \"L4\",\n                        \"parameters\": {\n                            \"transformation\": \"region\",\n                            \"region\": \"L5\",\n                            \"parameters\": {\n                                \"transformation\": \"region\",\n                                \"region\": \"L6\",\n                                \"parameters\": {\n                                    \"transformation\": \"region\",\n                                    \"region\": \"L7\",\n                                    \"parameters\": {\n                                        \"transformation\": \"region\",\n                                        \"region\": \"L8\",\n                                        \"parameters\": {\n                                            \"transformation\": \"region\",\n                                            \"region\": \"L9\",\n                                            \"parameters\": {\n                                                \"transformation\": \"region\",\n                                                \"region\": \"L10\",\n                                                \"parameters\": {\n                                                    \"transformation\": \"region\",\n                                                    \"region\": \"L11\",\n                                                    \"parameters\": {\n                                                        \"transformation\": \"region\",\n                                                        \"region\": \"L12\",\n                                                        \"parameters\": {\n                                                            \"transfor"
+      },
+      "proposals": {
+        "total": 0,
+        "supported": 0,
+        "matched_a_site": 0,
+        "unsupported": 0,
+        "invalid": 0,
+        "duplicate": 0
+      },
+      "validation_notes": [
+        "the model's reply could not be used: the JSON in the reply is incomplete (cut off?) (the reply was cut off at the token limit)"
+      ]
+    },
+    "c_compiler_available": true,
+    "baseline_runs_cleanly": true,
+    "applied": 3,
+    "model_before": {
+      "operations": 42130854.0000,
+      "loads": 6480004.0000,
+      "stores": 6480000.0000,
+      "estimated_dram_lines": 12960000.0000,
+      "strided_accesses": 12960000.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 61.9491,
+      "model_cost": 145810854.0000
+    },
+    "model_after": {
+      "operations": 39700854.0000,
+      "loads": 6480004.0000,
+      "stores": 6480000.0000,
+      "estimated_dram_lines": 1620000.0000,
+      "strided_accesses": 6480000.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 47.6218,
+      "model_cost": 52660854.0000
+    },
+    "candidates": [
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "w1",
+        "line": 19,
+        "description": "swap the loops over 'j' and 'i' (lines 19 and 20) in w1",
+        "region": "w1/L1",
+        "source": "compiler",
+        "explanation": "The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6581,
+            "model_cost": 100450854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "code": {
+          "before": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n",
+          "after": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "w2",
+        "line": 31,
+        "description": "swap the loops over 'j' and 'i' (lines 31 and 32) in w2",
+        "region": "w2/L1",
+        "source": "compiler",
+        "explanation": "The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 50.0064,
+            "model_cost": 100450854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "w1",
+        "line": 20,
+        "description": "unroll the loop over 'i' (line 20, 1800 iterations) in w1",
+        "region": "w1/L2",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 39700854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 58.8758,
+            "model_cost": 143380854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "w2",
+        "line": 32,
+        "description": "unroll the loop over 'i' (line 32, 1800 iterations) in w2",
+        "region": "w2/L2",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "the cost model predicts too small a gain (cost 145810854 to 143380854, contention 61.9 to 66.3)",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 39700854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 66.2863,
+            "model_cost": 143380854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        }
+      },
+      {
+        "round": 2,
+        "transformation": "interchange",
+        "function": "w2",
+        "line": 31,
+        "description": "swap the loops over 'j' and 'i' (lines 31 and 32) in w2",
+        "region": "w2/L1",
+        "source": "compiler",
+        "explanation": "The inner loop currently walks arrays with a large stride (6.5 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 7.3 million to 1.6 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6581,
+            "model_cost": 100450854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 1620000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 50.0064,
+            "model_cost": 55090854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "code": {
+          "before": "void *w2(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n",
+          "after": "void *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n"
+        }
+      },
+      {
+        "round": 2,
+        "transformation": "unrolling",
+        "function": "w1",
+        "line": 20,
+        "description": "unroll the loop over 'j' (line 20, 1800 iterations) in w1",
+        "region": "w1/L2",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'j' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6581,
+            "model_cost": 100450854.0000
+          },
+          "after": {
+            "operations": 39700854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6192,
+            "model_cost": 98020854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        }
+      },
+      {
+        "round": 3,
+        "transformation": "unrolling",
+        "function": "w1",
+        "line": 20,
+        "description": "unroll the loop over 'j' (line 20, 1800 iterations) in w1",
+        "region": "w1/L2",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'j' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "model",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 1620000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 50.0064,
+            "model_cost": 55090854.0000
+          },
+          "after": {
+            "operations": 39700854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 1620000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 47.6218,
+            "model_cost": 52660854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "code": {
+          "before": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n",
+          "after": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j += 4) {\n            {\n                b1[i][j] = a1[i][j] + 1.0;\n            }\n            {\n                b1[i][j + 1] = a1[i][j + 1] + 1.0;\n            }\n            {\n                b1[i][j + 2] = a1[i][j + 2] + 1.0;\n            }\n            {\n                b1[i][j + 3] = a1[i][j + 3] + 1.0;\n            }\n        }\n    }\n    return NULL;\n}\n"
+        }
+      }
+    ]
+  },
+  "warnings": []
+}

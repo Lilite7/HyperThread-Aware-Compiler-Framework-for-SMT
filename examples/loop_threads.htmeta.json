@@ -1,0 +1,772 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/loop_threads.c",
+  "topology": {
+    "source": "user",
+    "smt_detected": true,
+    "cores": 4,
+    "logical_cpus": 8,
+    "l1d_bytes": 49152,
+    "l2_bytes": 2097152,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7]
+    ]
+  },
+  "program": {
+    "thread_sites": 2,
+    "threads": 6,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [
+    {
+      "id": 0,
+      "name": "streamer#0",
+      "worker": "streamer",
+      "create_line": 45,
+      "handle": "streamers",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 0,
+      "assigned_cpu": 0,
+      "profile": {
+        "int_ops": 1000000.0000,
+        "fp_ops": 1000000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 1000000.0000,
+        "stores": 500000.0000,
+        "branches": 500000.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 4000000.0000,
+        "estimated_dram_lines": 125000.0000,
+        "working_set_bytes": 8000000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 1500000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2500,
+          "floating_point": 0.2500,
+          "heavy_math": 0.0000,
+          "load_store": 0.3750,
+          "memory_bandwidth": 0.5000
+        }
+      },
+      "arrays": [
+        {
+          "name": "src",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 4000000.0000
+        },
+        {
+          "name": "dst",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 500000.0000,
+          "footprint_bytes": 4000000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 1,
+      "name": "streamer#1",
+      "worker": "streamer",
+      "create_line": 45,
+      "handle": "streamers",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 1,
+      "assigned_cpu": 1,
+      "profile": {
+        "int_ops": 1000000.0000,
+        "fp_ops": 1000000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 1000000.0000,
+        "stores": 500000.0000,
+        "branches": 500000.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 4000000.0000,
+        "estimated_dram_lines": 125000.0000,
+        "working_set_bytes": 8000000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 1500000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2500,
+          "floating_point": 0.2500,
+          "heavy_math": 0.0000,
+          "load_store": 0.3750,
+          "memory_bandwidth": 0.5000
+        }
+      },
+      "arrays": [
+        {
+          "name": "src",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 4000000.0000
+        },
+        {
+          "name": "dst",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 500000.0000,
+          "footprint_bytes": 4000000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 2,
+      "name": "streamer#2",
+      "worker": "streamer",
+      "create_line": 45,
+      "handle": "streamers",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 2,
+      "assigned_cpu": 2,
+      "profile": {
+        "int_ops": 1000000.0000,
+        "fp_ops": 1000000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 1000000.0000,
+        "stores": 500000.0000,
+        "branches": 500000.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 4000000.0000,
+        "estimated_dram_lines": 125000.0000,
+        "working_set_bytes": 8000000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 1500000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2500,
+          "floating_point": 0.2500,
+          "heavy_math": 0.0000,
+          "load_store": 0.3750,
+          "memory_bandwidth": 0.5000
+        }
+      },
+      "arrays": [
+        {
+          "name": "src",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 4000000.0000
+        },
+        {
+          "name": "dst",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 500000.0000,
+          "footprint_bytes": 4000000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 3,
+      "name": "streamer#3",
+      "worker": "streamer",
+      "create_line": 45,
+      "handle": "streamers",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 3,
+      "assigned_cpu": 3,
+      "profile": {
+        "int_ops": 1000000.0000,
+        "fp_ops": 1000000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 1000000.0000,
+        "stores": 500000.0000,
+        "branches": 500000.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 4000000.0000,
+        "estimated_dram_lines": 125000.0000,
+        "working_set_bytes": 8000000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 1500000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2500,
+          "floating_point": 0.2500,
+          "heavy_math": 0.0000,
+          "load_store": 0.3750,
+          "memory_bandwidth": 0.5000
+        }
+      },
+      "arrays": [
+        {
+          "name": "src",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 4000000.0000
+        },
+        {
+          "name": "dst",
+          "scope": "global",
+          "bytes": 4000000,
+          "reads": 500000.0000,
+          "writes": 500000.0000,
+          "footprint_bytes": 4000000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 4,
+      "name": "cruncher#0",
+      "worker": "cruncher",
+      "create_line": 48,
+      "handle": "crunchers",
+      "created_in": "main",
+      "class": "compute-bound (div/sqrt/math)",
+      "start_event": 1,
+      "end_event": 3,
+      "assigned_core": 0,
+      "assigned_cpu": 4,
+      "profile": {
+        "int_ops": 3999998.0000,
+        "fp_ops": 3999998.0000,
+        "heavy_ops": 21999989.0000,
+        "loads": 0.0000,
+        "stores": 0.0000,
+        "branches": 1999999.0000,
+        "io_ops": 50.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 32000034.0000,
+        "estimated_dram_lines": 0.0000,
+        "working_set_bytes": 0.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 0.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.1250,
+          "floating_point": 0.1250,
+          "heavy_math": 0.6875,
+          "load_store": 0.0000,
+          "memory_bandwidth": 0.0000
+        }
+      },
+      "arrays": [],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 5,
+      "name": "cruncher#1",
+      "worker": "cruncher",
+      "create_line": 48,
+      "handle": "crunchers",
+      "created_in": "main",
+      "class": "compute-bound (div/sqrt/math)",
+      "start_event": 1,
+      "end_event": 3,
+      "assigned_core": 1,
+      "assigned_cpu": 5,
+      "profile": {
+        "int_ops": 3999998.0000,
+        "fp_ops": 3999998.0000,
+        "heavy_ops": 21999989.0000,
+        "loads": 0.0000,
+        "stores": 0.0000,
+        "branches": 1999999.0000,
+        "io_ops": 50.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 32000034.0000,
+        "estimated_dram_lines": 0.0000,
+        "working_set_bytes": 0.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 0.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.1250,
+          "floating_point": 0.1250,
+          "heavy_math": 0.6875,
+          "load_store": 0.0000,
+          "memory_bandwidth": 0.0000
+        }
+      },
+      "arrays": [],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    }
+  ],
+  "contention_pairs": [
+    {
+      "a": 0,
+      "b": 1,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 0,
+      "b": 2,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 0,
+      "b": 3,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 0,
+      "b": 4,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 0,
+      "b": 5,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 1,
+      "b": 2,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 1,
+      "b": 4,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 1,
+      "b": 5,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 2,
+      "b": 3,
+      "score": 54.6250,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.3000,
+        "load_store": 0.3750,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB",
+        "execution units: both threads demand floating-point units",
+        "load/store ports: both threads are memory-instruction heavy",
+        "shared data 'src' (read-only)",
+        "shared data 'dst' (at least one writer)"
+      ]
+    },
+    {
+      "a": 2,
+      "b": 4,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 2,
+      "b": 5,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 3,
+      "b": 4,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 3,
+      "b": 5,
+      "score": 2.5312,
+      "severity": "low",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.1500,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 0.5625,
+        "lock_factor": 1.0000
+      },
+      "conflicts": []
+    },
+    {
+      "a": 4,
+      "b": 5,
+      "score": 30.0000,
+      "severity": "medium",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 1.0000,
+        "load_store": 0.0000,
+        "cache": 0.0000,
+        "memory_bandwidth": 0.0000,
+        "overlap_factor": 1.0000,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "execution units: both threads demand divide/sqrt/math units"
+      ]
+    }
+  ],
+  "high_contention_pairs": [
+    [0, 1],
+    [0, 2],
+    [0, 3],
+    [1, 2],
+    [1, 3],
+    [2, 3]
+  ],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "spread",
+    "naive_total": 109.2500,
+    "optimized_total": 5.0625,
+    "worst_total": 109.2500,
+    "predicted_reduction_vs_naive_percent": 95.3661,
+    "emitted": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 5.0625,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 4],
+          "pair_score": 2.5312,
+          "advice": "low contention: SMT co-location is beneficial"
+        },
+        {
+          "core": 1,
+          "cpus": [1, 5],
+          "threads": [1, 5],
+          "pair_score": 2.5312,
+          "advice": "low contention: SMT co-location is beneficial"
+        },
+        {
+          "core": 2,
+          "cpus": [2],
+          "threads": [2],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        },
+        {
+          "core": 3,
+          "cpus": [3],
+          "threads": [3],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        }
+      ]
+    },
+    "optimized": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 5.0625,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 4],
+          "pair_score": 2.5312,
+          "advice": "low contention: SMT co-location is beneficial"
+        },
+        {
+          "core": 1,
+          "cpus": [1, 5],
+          "threads": [1, 5],
+          "pair_score": 2.5312,
+          "advice": "low contention: SMT co-location is beneficial"
+        },
+        {
+          "core": 2,
+          "cpus": [2],
+          "threads": [2],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        },
+        {
+          "core": 3,
+          "cpus": [3],
+          "threads": [3],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        }
+      ]
+    },
+    "naive": {
+      "algorithm": "creation-order",
+      "predicted_total_contention": 109.2500,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 54.6250,
+          "advice": "high contention: prefer separate cores if available"
+        },
+        {
+          "core": 1,
+          "cpus": [1, 5],
+          "threads": [2, 3],
+          "pair_score": 54.6250,
+          "advice": "high contention: prefer separate cores if available"
+        },
+        {
+          "core": 2,
+          "cpus": [2],
+          "threads": [4],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        },
+        {
+          "core": 3,
+          "cpus": [3],
+          "threads": [5],
+          "pair_score": 0.0000,
+          "advice": "thread runs alone on this core"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

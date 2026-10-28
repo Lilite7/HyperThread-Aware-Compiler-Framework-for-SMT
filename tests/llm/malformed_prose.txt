@@ -1,0 +1,1 @@
+Sure! Looking at your program, I think loop interchange would help the column walk. Let me know if you want more detail.

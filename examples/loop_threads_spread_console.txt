@@ -1,0 +1,38 @@
+HT-Compass 1.0.0 - tests/loop_threads.c
+Topology : 4 core(s), 8 logical CPU(s) [user]; L1D 48.0 KiB, L2 2.0 MiB
+Threads  : 6 (from 2 creation site(s))
+
+  id  thread                 class                                  ops     bw footprint
+  T0  streamer#0             memory-bound                         4e+06   0.50   7.6 MiB
+  T1  streamer#1             memory-bound                         4e+06   0.50   7.6 MiB
+  T2  streamer#2             memory-bound                         4e+06   0.50   7.6 MiB
+  T3  streamer#3             memory-bound                         4e+06   0.50   7.6 MiB
+  T4  cruncher#0             compute-bound (div/sqrt/math)      3.2e+07   0.00       0 B
+  T5  cruncher#1             compute-bound (div/sqrt/math)      3.2e+07   0.00       0 B
+
+Contention scores (0-100, higher = worse when sharing a core):
+  T0-T1   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T0-T2   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T0-T3   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T0-T4    2.5  low   
+  T0-T5    2.5  low   
+  T1-T2   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T1-T3   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T1-T4    2.5  low   
+  T1-T5    2.5  low   
+  T2-T3   54.6  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T2-T4    2.5  low   
+  T2-T5    2.5  low   
+  T3-T4    2.5  low   
+  T3-T5    2.5  low   
+  T4-T5   30.0  medium  execution units: both threads demand divide/sqrt/math units
+
+Mapping (optimized, exact-dp):
+  core 0 (CPU 0 4): T0 streamer#0 + T4 cruncher#0
+  core 1 (CPU 1 5): T1 streamer#1 + T5 cruncher#1
+  core 2 (CPU 2): T2 streamer#2
+  core 3 (CPU 3): T3 streamer#3
+
+Predicted total contention: naive 109.2 -> optimized 5.1  (95% lower)   [worst case 109.2]
+
+Wrote examples/loop_threads_gen.c and examples/loop_threads.htmeta.json

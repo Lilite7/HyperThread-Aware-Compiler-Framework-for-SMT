@@ -1,0 +1,30 @@
+Warning: no pthread_create call found: nothing to analyse
+HT-Compass 1.0.0 - tests/opt/promotion.c
+Topology : 4 core(s), 8 logical CPU(s) [user]; L1D 48.0 KiB, L2 2.0 MiB
+Threads  : 0 (from 0 creation site(s))
+
+Optimization: 1 change(s) applied
+  applied  interchange swap the loops over 'j' and 'k' (lines 25 and 26) in main
+           measured 1.25x best-of-15 (0.073 s to 0.058 s, median 1.27x); 3 run(s) agreed (memory and output identical)
+           model: DRAM lines 104030606 to 24473475, operations 963988702 to 1054710502, contention 0.0 to 0.0
+  rejected fusion      fuse the loops at lines 24 and 31 in main
+           measured 0.97x best-of-15 (median 1.00x, 0.071 s to 0.073 s); 1.03x is needed
+  rejected promotion   keep c[i][j] in a register across the loop over 'k' (line 26) in main
+           measured 1.01x best-of-15 (median 1.00x, 0.069 s to 0.068 s); 1.03x is needed
+  skipped  interchange swap the loops over 'i' and 'j' (lines 18 and 19) in main
+           legal, but the locality analysis expects no gain
+  skipped  interchange swap the loops over 'i' and 'j' (lines 24 and 25) in main
+           legal, but the locality analysis expects no gain
+  skipped  interchange swap the loops over 'i' and 'j' (lines 31 and 32) in main
+           legal, but the locality analysis expects no gain
+  rejected interchange swap the loops over 'j' and 'k' (lines 32 and 33) in main
+           not provably safe: dependence between d[i][(j+1)] and d[i][j] would be reversed
+  rejected fusion      fuse the loops at lines 18 and 24 in main
+           not provably safe: cannot prove a[i][j] (loop 1) and a[i][k] (loop 2) independent
+  rejected promotion   keep a[i][k] in a register across the loop over 'j' (line 26) in main
+           measured 1.01x best-of-15 (median 1.02x, 0.056 s to 0.056 s); 1.03x is needed
+  end to end: 0.071 s to 0.056 s  (1.25x)
+
+No pthread_create calls found; nothing to optimize.
+
+Wrote examples/promotion_gen.c and examples/promotion.htmeta.json

@@ -1,0 +1,388 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/opt/transpose.c",
+  "topology": {
+    "source": "sysfs",
+    "smt_detected": true,
+    "cores": 8,
+    "logical_cpus": 16,
+    "l1d_bytes": 49152,
+    "l2_bytes": 1310720,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 1],
+      [2, 3],
+      [4, 5],
+      [6, 7],
+      [8, 9],
+      [10, 11],
+      [12, 13],
+      [14, 15]
+    ]
+  },
+  "program": {
+    "thread_sites": 0,
+    "threads": 0,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [],
+  "contention_pairs": [],
+  "high_contention_pairs": [],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "pack",
+    "naive_total": 0.0000,
+    "optimized_total": 0.0000,
+    "worst_total": 0.0000,
+    "predicted_reduction_vs_naive_percent": 0.0000,
+    "emitted": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "optimized": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "naive": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    }
+  },
+  "optimization": {
+    "plan_only": false,
+    "settings": {
+      "fp_reassociation_allowed": false,
+      "differential_test": true,
+      "benchmark_selection": true,
+      "min_speedup": 1.0300,
+      "benchmark_runs": 5,
+      "random_data_seeds": 2
+    },
+    "ai": {
+      "mode": "local-model",
+      "available": true,
+      "failed": false,
+      "model": "qwen2.5-coder:1.5b",
+      "endpoint": "127.0.0.1:11434",
+      "ollama_version": "0.40.11",
+      "installed_models": [
+        "qwen2.5-coder:1.5b"
+      ],
+      "request": {
+        "prompt_characters": 3368
+      },
+      "response": {
+        "characters": 581,
+        "seconds": 16.8050,
+        "prompt_tokens": 985,
+        "generated_tokens": 146,
+        "cut_off_at_token_limit": false,
+        "excerpt": "{\"proposals\":[{\"transformation\":\"fusion\",\"region\":\"main/L1\",\"parameters\":{},\"explanation\":\"Fusion of the two inner loops over the same range (line 15 and line 20) can reduce the number of iterations and improve cache utilization.\", \"expected_benefit\":\"The number of iterations is reduced from 3000 * 3000 to 3000 * 2000, which can lead to better cache utilization and potentially faster execution.\", \"preconditions\":[\"The loops are perfectly nested and the range is the same for both loops.\"],\"risks\":[\"There is no risk of introducing new loop-carried dependence.\"],\"priority\":2}]}"
+      },
+      "proposals": {
+        "total": 1,
+        "supported": 1,
+        "matched_a_site": 0,
+        "unsupported": 0,
+        "invalid": 0,
+        "duplicate": 0
+      },
+      "validation_notes": []
+    },
+    "c_compiler_available": true,
+    "baseline_runs_cleanly": true,
+    "applied": 2,
+    "model_before": {
+      "operations": 108018051.0000,
+      "loads": 9000001.0000,
+      "stores": 18000000.0000,
+      "estimated_dram_lines": 19125000.0000,
+      "strided_accesses": 18000000.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 261018051.0000
+    },
+    "model_after": {
+      "operations": 108009051.0000,
+      "loads": 9000001.0000,
+      "stores": 18000000.0000,
+      "estimated_dram_lines": 3375000.0000,
+      "strided_accesses": 0.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 135009051.0000
+    },
+    "end_to_end_timing": {
+      "original_seconds": 0.1116,
+      "optimized_seconds": 0.0471,
+      "speedup": 2.3695
+    },
+    "candidates": [
+      {
+        "round": 1,
+        "transformation": "fusion",
+        "function": "main",
+        "line": 14,
+        "description": "fusion proposed for main/L1",
+        "region": "main/L1",
+        "source": "model",
+        "model_proposal": {
+          "rank": 1,
+          "explanation": "Fusion of the two inner loops over the same range (line 15 and line 20) can reduce the number of iterations and improve cache utilization.",
+          "expected_benefit": "The number of iterations is reduced from 3000 * 3000 to 3000 * 2000, which can lead to better cache utilization and potentially faster execution.",
+          "preconditions": "The loops are perfectly nested and the range is the same for both loops.",
+          "risks": "There is no risk of introducing new loop-carried dependence."
+        },
+        "safety": "-",
+        "status": "rejected",
+        "reason": "the compiler found no fusion opportunity at main/L1 (the loop is not a supported pattern: it needs constant bounds, affine subscripts and no calls)",
+        "suggested_by_advice": true
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 19,
+        "description": "swap the loops over 'j' and 'i' (lines 19 and 20) in main",
+        "region": "main/L3",
+        "source": "compiler",
+        "explanation": "The inner loop currently walks arrays with a large stride (18.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 19.1 million to 3.4 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 108018051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 19125000.0000,
+            "strided_accesses": 18000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 261018051.0000
+          },
+          "after": {
+            "operations": 108018051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 3375000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 135018051.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.1008,
+          "candidate_seconds": 0.0462,
+          "speedup": 2.1811,
+          "speedup_median": 2.1646,
+          "runs": 10
+        },
+        "code": {
+          "before": "int main(void) {\n    int i;\n    int j;\n    for (i = 0; i < 3000; i++) {\n        for (j = 0; j < 3000; j++) {\n            a[i][j] = i + j * 0.5;\n        }\n    }\n    for (j = 0; j < 3000; j++) {\n        for (i = 0; i < 3000; i++) {\n            b[i][j] = a[i][j] * 2.0;\n        }\n    }\n    printf(\"%f\\n\", b[3][4]);\n    return 0;\n}\n",
+          "after": "int main(void) {\n    int i;\n    int j;\n    for (i = 0; i < 3000; i++) {\n        for (j = 0; j < 3000; j++) {\n            a[i][j] = i + j * 0.5;\n        }\n    }\n    for (i = 0; i < 3000; i++) {\n        for (j = 0; j < 3000; j++) {\n            b[i][j] = a[i][j] * 2.0;\n        }\n    }\n    printf(\"%f\\n\", b[3][4]);\n    return 0;\n}\n"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 15,
+        "description": "unroll the loop over 'j' (line 15, 3000 iterations) in main",
+        "region": "main/L2",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 108.0 million to 101.3 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.03x best-of-9 (median 0.99x, 0.112 s to 0.109 s); 1.03x is needed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000) is a compile-time constant and 'j' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 108018051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 19125000.0000,
+            "strided_accesses": 18000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 261018051.0000
+          },
+          "after": {
+            "operations": 101268051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 19125000.0000,
+            "strided_accesses": 27000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 254268051.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.1121,
+          "candidate_seconds": 0.1088,
+          "speedup": 1.0299,
+          "speedup_median": 0.9948,
+          "runs": 9
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 20,
+        "description": "unroll the loop over 'i' (line 20, 3000 iterations) in main",
+        "region": "main/L4",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 108.0 million to 101.3 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.01x best-of-9 (median 1.05x, 0.101 s to 0.100 s); 1.03x is needed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 108018051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 19125000.0000,
+            "strided_accesses": 18000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 261018051.0000
+          },
+          "after": {
+            "operations": 101268051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 19125000.0000,
+            "strided_accesses": 18000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 254268051.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.1006,
+          "candidate_seconds": 0.0999,
+          "speedup": 1.0073,
+          "speedup_median": 1.0519,
+          "runs": 9
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 14,
+        "description": "swap the loops over 'i' and 'j' (lines 14 and 15) in main",
+        "region": "main/L1",
+        "source": "compiler",
+        "safety": "exact",
+        "status": "skipped",
+        "reason": "legal, but the locality analysis expects no gain",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false
+      },
+      {
+        "round": 2,
+        "transformation": "fusion",
+        "function": "main",
+        "line": 14,
+        "description": "fuse the loops at lines 14 and 19 in main",
+        "region": "main/L1",
+        "source": "compiler",
+        "explanation": "Both loops cover the same range and use the same arrays. Fusing them lets each element be reused while it is still in cache (estimated memory lines 3.4 million to 3.4 million, operations 108.0 million to 108.0 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "identical iteration space; checked 1 array pair(s) across the two loops, every shared element is reached by loop 1 no later than by loop 2",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 108018051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 3375000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 135018051.0000
+          },
+          "after": {
+            "operations": 108009051.0000,
+            "loads": 9000001.0000,
+            "stores": 18000000.0000,
+            "estimated_dram_lines": 3375000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 135009051.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0515,
+          "candidate_seconds": 0.0491,
+          "speedup": 1.0483,
+          "speedup_median": 1.1141,
+          "runs": 15
+        },
+        "code": {
+          "before": "int main(void) {\n    int i;\n    int j;\n    for (i = 0; i < 3000; i++) {\n        for (j = 0; j < 3000; j++) {\n            a[i][j] = i + j * 0.5;\n        }\n    }\n    for (i = 0; i < 3000; i++) {\n        for (j = 0; j < 3000; j++) {\n            b[i][j] = a[i][j] * 2.0;\n        }\n    }\n    printf(\"%f\\n\", b[3][4]);\n    return 0;\n}\n",
+          "after": "int main(void) {\n    int i;\n    int j;\n    for (i = 0; i < 3000; i++) {\n        {\n            for (j = 0; j < 3000; j++) {\n                a[i][j] = i + j * 0.5;\n            }\n        }\n        {\n            for (j = 0; j < 3000; j++) {\n                b[i][j] = a[i][j] * 2.0;\n            }\n        }\n    }\n    printf(\"%f\\n\", b[3][4]);\n    return 0;\n}\n"
+        }
+      }
+    ]
+  },
+  "warnings": [
+    "no pthread_create call found: nothing to analyse"
+  ]
+}

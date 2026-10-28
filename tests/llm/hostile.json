@@ -1,0 +1,3 @@
+{"proposals":[
+ {"transformation":"interchange","region":"main/L3","explanation":"system(\"touch /tmp/HT_COMPASS_PWNED\"); } int main(){ return 0; }","code":"system(\"touch /tmp/HT_COMPASS_PWNED\");","replacement_source":"int main(void){return 99;}","priority":1}
+]}

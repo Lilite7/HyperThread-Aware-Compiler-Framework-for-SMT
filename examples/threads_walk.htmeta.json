@@ -1,0 +1,426 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/opt/threads_walk.c",
+  "topology": {
+    "source": "user",
+    "smt_detected": true,
+    "cores": 4,
+    "logical_cpus": 8,
+    "l1d_bytes": 49152,
+    "l2_bytes": 2097152,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7]
+    ]
+  },
+  "program": {
+    "thread_sites": 2,
+    "threads": 2,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [
+    {
+      "id": 0,
+      "name": "w1",
+      "worker": "w1",
+      "create_line": 41,
+      "handle": "t",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 0,
+      "end_event": 2,
+      "assigned_core": 0,
+      "assigned_cpu": 0,
+      "profile": {
+        "int_ops": 6483600.0000,
+        "fp_ops": 3240000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 3240000.0000,
+        "stores": 3240000.0000,
+        "branches": 3241800.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 19445400.0000,
+        "estimated_dram_lines": 810000.0000,
+        "working_set_bytes": 51840000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 6480000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.3334,
+          "floating_point": 0.1666,
+          "heavy_math": 0.0000,
+          "load_store": 0.3332,
+          "memory_bandwidth": 0.6665
+        }
+      },
+      "arrays": [
+        {
+          "name": "a1",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 3240000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 25920000.0000
+        },
+        {
+          "name": "b1",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 0.0000,
+          "writes": 3240000.0000,
+          "footprint_bytes": 25920000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    },
+    {
+      "id": 1,
+      "name": "w2",
+      "worker": "w2",
+      "create_line": 42,
+      "handle": "t",
+      "created_in": "main",
+      "class": "memory-bound",
+      "start_event": 1,
+      "end_event": 2,
+      "assigned_core": 0,
+      "assigned_cpu": 4,
+      "profile": {
+        "int_ops": 6483600.0000,
+        "fp_ops": 6480000.0000,
+        "heavy_ops": 0.0000,
+        "loads": 3240000.0000,
+        "stores": 3240000.0000,
+        "branches": 3241800.0000,
+        "io_ops": 0.0000,
+        "lock_ops": 0.0000,
+        "total_ops": 22685400.0000,
+        "estimated_dram_lines": 810000.0000,
+        "working_set_bytes": 51840000.0000,
+        "assumed_trip_counts": 0,
+        "access_patterns": {
+          "sequential": 6480000.0000,
+          "strided": 0.0000,
+          "irregular": 0.0000
+        },
+        "normalized_demand": {
+          "integer": 0.2858,
+          "floating_point": 0.2856,
+          "heavy_math": 0.0000,
+          "load_store": 0.2856,
+          "memory_bandwidth": 0.5713
+        }
+      },
+      "arrays": [
+        {
+          "name": "a2",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 3240000.0000,
+          "writes": 0.0000,
+          "footprint_bytes": 25920000.0000
+        },
+        {
+          "name": "b2",
+          "scope": "global",
+          "bytes": 25920000,
+          "reads": 0.0000,
+          "writes": 3240000.0000,
+          "footprint_bytes": 25920000.0000
+        }
+      ],
+      "shared_scalars_read": [],
+      "shared_scalars_written": [],
+      "locks": []
+    }
+  ],
+  "contention_pairs": [
+    {
+      "a": 0,
+      "b": 1,
+      "score": 50.0064,
+      "severity": "high",
+      "may_run_concurrently": true,
+      "components": {
+        "execution_units": 0.2476,
+        "load_store": 0.2856,
+        "cache": 1.0000,
+        "memory_bandwidth": 0.5713,
+        "overlap_factor": 0.9286,
+        "lock_factor": 1.0000
+      },
+      "conflicts": [
+        "memory bandwidth: both threads stream data from beyond the L2 cache",
+        "L1D capacity: combined footprint 98.9 MiB vs shared L1D 48.0 KiB"
+      ]
+    }
+  ],
+  "high_contention_pairs": [
+    [0, 1]
+  ],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "pack",
+    "naive_total": 50.0064,
+    "optimized_total": 50.0064,
+    "worst_total": 50.0064,
+    "predicted_reduction_vs_naive_percent": 0.0000,
+    "emitted": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 50.0064,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 50.0064,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    },
+    "optimized": {
+      "algorithm": "exact-dp",
+      "predicted_total_contention": 50.0064,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 50.0064,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    },
+    "naive": {
+      "algorithm": "creation-order",
+      "predicted_total_contention": 50.0064,
+      "cores": [
+        {
+          "core": 0,
+          "cpus": [0, 4],
+          "threads": [0, 1],
+          "pair_score": 50.0064,
+          "advice": "high contention: prefer separate cores if available"
+        }
+      ]
+    }
+  },
+  "optimization": {
+    "plan_only": false,
+    "settings": {
+      "fp_reassociation_allowed": false,
+      "differential_test": true,
+      "benchmark_selection": true,
+      "min_speedup": 1.0300,
+      "benchmark_runs": 5,
+      "random_data_seeds": 2
+    },
+    "c_compiler_available": true,
+    "baseline_runs_cleanly": true,
+    "applied": 2,
+    "model_before": {
+      "operations": 42130854.0000,
+      "loads": 6480004.0000,
+      "stores": 6480000.0000,
+      "estimated_dram_lines": 12960000.0000,
+      "strided_accesses": 12960000.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 61.9491,
+      "model_cost": 145810854.0000
+    },
+    "model_after": {
+      "operations": 42130854.0000,
+      "loads": 6480004.0000,
+      "stores": 6480000.0000,
+      "estimated_dram_lines": 1620000.0000,
+      "strided_accesses": 0.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 50.0064,
+      "model_cost": 55090854.0000
+    },
+    "end_to_end_timing": {
+      "original_seconds": 0.0741,
+      "optimized_seconds": 0.0321,
+      "speedup": 2.3089
+    },
+    "candidates": [
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "w1",
+        "line": 19,
+        "description": "swap the loops over 'j' and 'i' (lines 19 and 20) in w1",
+        "explanation": "The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6581,
+            "model_cost": 100450854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0729,
+          "candidate_seconds": 0.0528,
+          "speedup": 1.3818,
+          "speedup_median": 1.4376,
+          "runs": 15
+        },
+        "code": {
+          "before": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n",
+          "after": "void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n"
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "w2",
+        "line": 31,
+        "description": "swap the loops over 'j' and 'i' (lines 31 and 32) in w2",
+        "explanation": "The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 12960000.0000,
+            "strided_accesses": 12960000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 61.9491,
+            "model_cost": 145810854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 50.0064,
+            "model_cost": 100450854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0757,
+          "candidate_seconds": 0.0541,
+          "speedup": 1.3979,
+          "speedup_median": 1.4334,
+          "runs": 15
+        }
+      },
+      {
+        "round": 2,
+        "transformation": "interchange",
+        "function": "w2",
+        "line": 31,
+        "description": "swap the loops over 'j' and 'i' (lines 31 and 32) in w2",
+        "explanation": "The inner loop currently walks arrays with a large stride (6.5 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 7.3 million to 1.6 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 7290000.0000,
+            "strided_accesses": 6480000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 52.6581,
+            "model_cost": 100450854.0000
+          },
+          "after": {
+            "operations": 42130854.0000,
+            "loads": 6480004.0000,
+            "stores": 6480000.0000,
+            "estimated_dram_lines": 1620000.0000,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 50.0064,
+            "model_cost": 55090854.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0520,
+          "candidate_seconds": 0.0308,
+          "speedup": 1.6875,
+          "speedup_median": 1.6905,
+          "runs": 15
+        },
+        "code": {
+          "before": "void *w2(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n",
+          "after": "void *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n"
+        }
+      }
+    ]
+  },
+  "warnings": []
+}

@@ -1,0 +1,9 @@
+{"proposals":[
+ {"transformation":"loop_interchange","region":"main/L3","parameters":{},
+  "explanation":"The second nest walks a and b column by column with a stride of 3000 elements.",
+  "expected_benefit":"Sequential access uses every fetched cache line; roughly 8x fewer lines for doubles.",
+  "preconditions":["no loop-carried dependence between iterations"],"risks":["wrong if iterations depend on each other"],"priority":1},
+ {"transformation":"tiling","region":"main/L3","parameters":{"tile_size":32},
+  "explanation":"Block the nest so a tile stays in cache.","expected_benefit":"cache reuse",
+  "preconditions":["bounds divisible by the tile"],"risks":["boundary handling"],"priority":2}
+]}

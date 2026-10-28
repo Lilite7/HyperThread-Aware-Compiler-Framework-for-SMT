@@ -1,0 +1,7 @@
+Here is my analysis of the program:
+
+```json
+{"proposals":[{"transformation":"interchange","region":"main/L3","explanation":"column walk","expected_benefit":"sequential access","preconditions":[],"risks":[],"priority":1}]}
+```
+
+Hope that helps!

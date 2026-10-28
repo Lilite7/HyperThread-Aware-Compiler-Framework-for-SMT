@@ -1,0 +1,25 @@
+HT-Compass 1.0.0 - tests/mixed.c
+Topology : 4 core(s), 8 logical CPU(s) [user]; L1D 48.0 KiB, L2 2.0 MiB
+Threads  : 4 (from 4 creation site(s))
+
+  id  thread                 class                                  ops     bw footprint
+  T0  stream_a               memory-bound                       1.6e+08   0.75  45.8 MiB
+  T1  stream_b               memory-bound                       1.6e+08   0.75  45.8 MiB
+  T2  fp_compute_1           compute-bound (floating point)     1.5e+08   0.00       0 B
+  T3  fp_compute_2           compute-bound (floating point)     1.5e+08   0.00       0 B
+
+Contention scores (0-100, higher = worse when sharing a core):
+  T0-T1   62.1  high    memory bandwidth: both threads stream data from beyond the L2 cache
+  T0-T2    8.7  low     execution units: both threads demand floating-point units
+  T0-T3    8.7  low     execution units: both threads demand floating-point units
+  T1-T2    8.7  low     execution units: both threads demand floating-point units
+  T1-T3    8.7  low     execution units: both threads demand floating-point units
+  T2-T3   14.4  low     execution units: both threads demand floating-point units
+
+Mapping (optimized, exact-dp):
+  core 0 (CPU 0 4): T0 stream_a + T2 fp_compute_1
+  core 1 (CPU 1 5): T1 stream_b + T3 fp_compute_2
+
+Predicted total contention: naive 76.5 -> optimized 17.4  (77% lower)   [worst case 76.5]
+
+Wrote examples/mixed_gen.c and examples/mixed.htmeta.json

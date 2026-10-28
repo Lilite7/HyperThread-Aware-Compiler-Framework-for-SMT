@@ -1,0 +1,5 @@
+{"proposals":[
+ {"transformation":"interchange","region":"main/L3","explanation":"first","priority":1},
+ {"transformation":"Loop Interchange","region":"main/L3","explanation":"same thing, different spelling","priority":2},
+ {"transformation":"loop-interchange","region":"main/L3","explanation":"and again","priority":3}
+]}

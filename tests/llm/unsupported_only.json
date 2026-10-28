@@ -1,0 +1,5 @@
+{"proposals":[
+ {"transformation":"tiling","region":"main/L3","parameters":{"tile_size":64},"explanation":"block it","priority":1},
+ {"transformation":"parallelization","region":"main/L3","explanation":"use OpenMP","priority":2},
+ {"transformation":"magic_speedup","region":"main/L3","explanation":"an invented transformation","priority":3}
+]}

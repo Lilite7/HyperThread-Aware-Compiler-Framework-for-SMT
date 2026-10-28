@@ -1,0 +1,6 @@
+{"proposals":[
+ {"transformation":"licm","region":"main/L3","explanation":"alpha*beta+sqrt(alpha) never changes inside the loop.","expected_benefit":"removes a sqrt per iteration","preconditions":["alpha and beta not modified"],"risks":["none"],"priority":1},
+ {"transformation":"unrolling","region":"main/L3","parameters":{"factor":8},"explanation":"long streaming loop","expected_benefit":"less loop overhead","preconditions":["constant trip count"],"risks":["code size"],"priority":2},
+ {"transformation":"strength_reduction","region":"main/L3","explanation":"replace multiplications","expected_benefit":"cheaper operations","preconditions":[],"risks":[],"priority":3},
+ {"transformation":"loop_interchange","region":"main/L9","explanation":"a region that does not exist","priority":4}
+]}

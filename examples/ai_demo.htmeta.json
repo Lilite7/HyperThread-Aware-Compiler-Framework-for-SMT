@@ -1,0 +1,768 @@
+{
+  "tool": "HT-Compass",
+  "version": "1.0.0",
+  "input_file": "tests/opt/unroll_licm.c",
+  "topology": {
+    "source": "user",
+    "smt_detected": true,
+    "cores": 4,
+    "logical_cpus": 8,
+    "l1d_bytes": 49152,
+    "l2_bytes": 2097152,
+    "cache_source": "sysfs",
+    "core_siblings": [
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7]
+    ]
+  },
+  "program": {
+    "thread_sites": 0,
+    "threads": 0,
+    "assumed_trip_counts": 0
+  },
+  "model": {
+    "weights": {
+      "execution_units": 0.3000,
+      "load_store": 0.1500,
+      "cache": 0.2500,
+      "memory_bandwidth": 0.3000
+    },
+    "severity_thresholds": {
+      "high": 35.0000,
+      "medium": 15.0000
+    },
+    "default_trip_count": 64,
+    "bandwidth_reference_bytes_per_op": 4.0000
+  },
+  "threads": [],
+  "contention_pairs": [],
+  "high_contention_pairs": [],
+  "mapping": {
+    "strategy_emitted": "optimized",
+    "policy": "pack",
+    "naive_total": 0.0000,
+    "optimized_total": 0.0000,
+    "worst_total": 0.0000,
+    "predicted_reduction_vs_naive_percent": 0.0000,
+    "emitted": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "optimized": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    },
+    "naive": {
+      "algorithm": "none",
+      "predicted_total_contention": 0.0000,
+      "cores": []
+    }
+  },
+  "optimization": {
+    "plan_only": false,
+    "settings": {
+      "fp_reassociation_allowed": false,
+      "differential_test": true,
+      "benchmark_selection": true,
+      "min_speedup": 1.0300,
+      "benchmark_runs": 5,
+      "random_data_seeds": 2
+    },
+    "ai": {
+      "mode": "reply-file (test hook, not real inference)",
+      "available": true,
+      "failed": false,
+      "model": "(reply file)",
+      "endpoint": "127.0.0.1:11434",
+      "installed_models": [],
+      "request": {
+        "prompt_characters": 3444
+      },
+      "response": {
+        "characters": 792,
+        "seconds": 0.0000,
+        "prompt_tokens": 0,
+        "generated_tokens": 0,
+        "cut_off_at_token_limit": false,
+        "excerpt": "{\"proposals\":[\n {\"transformation\":\"licm\",\"region\":\"main/L3\",\"explanation\":\"alpha*beta+sqrt(alpha) never changes inside the loop.\",\"expected_benefit\":\"removes a sqrt per iteration\",\"preconditions\":[\"alpha and beta not modified\"],\"risks\":[\"none\"],\"priority\":1},\n {\"transformation\":\"unrolling\",\"region\":\"main/L3\",\"parameters\":{\"factor\":8},\"explanation\":\"long streaming loop\",\"expected_benefit\":\"less loop overhead\",\"preconditions\":[\"constant trip count\"],\"risks\":[\"code size\"],\"priority\":2},\n {\"transformation\":\"strength_reduction\",\"region\":\"main/L3\",\"explanation\":\"replace multiplications\",\"expected_benefit\":\"cheaper operations\",\"preconditions\":[],\"risks\":[],\"priority\":3},\n {\"transformation\":\"loop_interchange\",\"region\":\"main/L9\",\"explanation\":\"a region that does not exist\",\"priority\":4}\n]}\n"
+      },
+      "proposals": {
+        "total": 4,
+        "supported": 2,
+        "matched_a_site": 2,
+        "unsupported": 1,
+        "invalid": 1,
+        "duplicate": 0
+      },
+      "validation_notes": []
+    },
+    "c_compiler_available": true,
+    "baseline_runs_cleanly": true,
+    "applied": 2,
+    "model_before": {
+      "operations": 504000579.0000,
+      "loads": 48000049.0000,
+      "stores": 30000030.0000,
+      "estimated_dram_lines": 9750009.7500,
+      "strided_accesses": 0.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 582000657.0000
+    },
+    "model_after": {
+      "operations": 225000288.0000,
+      "loads": 48000049.0000,
+      "stores": 30000030.0000,
+      "estimated_dram_lines": 1875001.8750,
+      "strided_accesses": 0.0000,
+      "irregular_accesses": 0.0000,
+      "predicted_contention": 0.0000,
+      "model_cost": 240000303.0000
+    },
+    "end_to_end_timing": {
+      "original_seconds": 0.0959,
+      "optimized_seconds": 0.0401,
+      "speedup": 2.3904
+    },
+    "candidates": [
+      {
+        "round": 1,
+        "transformation": "strength_reduction",
+        "function": "main",
+        "line": 23,
+        "description": "strength_reduction proposed for main/L3",
+        "region": "main/L3",
+        "source": "model",
+        "model_proposal": {
+          "rank": 3,
+          "explanation": "replace multiplications",
+          "expected_benefit": "cheaper operations",
+          "preconditions": "",
+          "risks": ""
+        },
+        "safety": "-",
+        "status": "unsupported",
+        "reason": "proposed, but this compiler has no implementation of 'strength_reduction'",
+        "suggested_by_advice": true
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "",
+        "line": 0,
+        "description": "interchange proposed for main/L9",
+        "region": "main/L9",
+        "source": "model",
+        "model_proposal": {
+          "rank": 4,
+          "explanation": "a region that does not exist",
+          "expected_benefit": "",
+          "preconditions": "",
+          "risks": ""
+        },
+        "safety": "-",
+        "status": "invalid",
+        "reason": "unknown region 'main/L9' (not in the REGIONS list)",
+        "suggested_by_advice": true
+      },
+      {
+        "round": 1,
+        "transformation": "licm",
+        "function": "main",
+        "line": 23,
+        "description": "move 1 loop-invariant computation(s) out of the loop over 'i' (line 23) in main",
+        "region": "main/L3",
+        "source": "model",
+        "model_proposal": {
+          "rank": 1,
+          "explanation": "alpha*beta+sqrt(alpha) never changes inside the loop.",
+          "expected_benefit": "removes a sqrt per iteration",
+          "preconditions": "alpha and beta not modified",
+          "risks": "none"
+        },
+        "explanation": "Some computations in the loop produce the same value every iteration. Computing them once before the loop saves repeating them (estimated operations 504.0 million to 216.0 million). Note that gcc -O2 often does this already.",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "1 expression(s), e.g. ((alpha*beta)+sqrt(alpha,)), use only constants and variables the loop never changes, call only math functions and cannot trap (no division by a variable); each is computed with the same operations on the same values, so the result is bit-identical",
+        "suggested_by_advice": true,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          },
+          "after": {
+            "operations": 216000387.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 294000465.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0887,
+          "candidate_seconds": 0.0685,
+          "speedup": 1.2950,
+          "speedup_median": 1.3124,
+          "runs": 15
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 23,
+        "description": "unroll the loop over 'i' (line 23, 3000003 iterations) in main",
+        "region": "main/L3",
+        "source": "model",
+        "model_proposal": {
+          "rank": 2,
+          "explanation": "long streaming loop",
+          "expected_benefit": "less loop overhead",
+          "preconditions": "constant trip count",
+          "risks": "code size"
+        },
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 504.0 million to 504.0 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": true,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          },
+          "after": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 72000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0879,
+          "candidate_seconds": 0.0627,
+          "speedup": 1.4020,
+          "speedup_median": 1.3490,
+          "runs": 15
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 22,
+        "description": "swap the loops over 'r' and 'i' (lines 22 and 23) in main",
+        "region": "main/L2",
+        "source": "compiler",
+        "explanation": "Swapping the two loops changes the order in which memory is visited (estimated memory lines 9.8 million to 1.9 million).",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          },
+          "after": {
+            "operations": 513000564.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 528000579.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0967,
+          "candidate_seconds": 0.0797,
+          "speedup": 1.2136,
+          "speedup_median": 1.2135,
+          "runs": 9
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 18,
+        "description": "unroll the loop over 'i' (line 18, 3000003 iterations) in main",
+        "region": "main/L1",
+        "source": "compiler",
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 504.0 million to 506.3 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.00x best-of-9 (median 0.97x, 0.087 s to 0.086 s); 1.03x is needed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          },
+          "after": {
+            "operations": 506250579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 6000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 584250657.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0867,
+          "candidate_seconds": 0.0864,
+          "speedup": 1.0035,
+          "speedup_median": 0.9744,
+          "runs": 9
+        }
+      },
+      {
+        "round": 1,
+        "transformation": "licm",
+        "function": "main",
+        "line": 22,
+        "description": "move 1 loop-invariant computation(s) out of the loop over 'r' (line 22) in main",
+        "region": "main/L2",
+        "source": "compiler",
+        "explanation": "Some computations in the loop produce the same value every iteration. Computing them once before the loop saves repeating them (estimated operations 504.0 million to 216.0 million). Note that gcc -O2 often does this already.",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "1 expression(s), e.g. ((alpha*beta)+sqrt(alpha,)), use only constants and variables the loop never changes, call only math functions and cannot trap (no division by a variable); each is computed with the same operations on the same values, so the result is bit-identical",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 504000579.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 582000657.0000
+          },
+          "after": {
+            "operations": 216000303.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 294000381.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0844,
+          "candidate_seconds": 0.0612,
+          "speedup": 1.3792,
+          "speedup_median": 1.3358,
+          "runs": 15
+        },
+        "code": {
+          "before": "int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * (alpha * beta + sqrt(alpha)) + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n",
+          "after": "int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n"
+        }
+      },
+      {
+        "round": 2,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 23,
+        "description": "unroll the loop over 'i' (line 23, 3000003 iterations) in main",
+        "region": "main/L3",
+        "source": "model",
+        "model_proposal": {
+          "rank": 2,
+          "explanation": "long streaming loop",
+          "expected_benefit": "less loop overhead",
+          "preconditions": "constant trip count",
+          "risks": "code size"
+        },
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 216.0 million to 216.0 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "passed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body",
+        "suggested_by_advice": true,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 216000303.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 294000381.0000
+          },
+          "after": {
+            "operations": 216000303.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 72000000.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 294000381.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0635,
+          "candidate_seconds": 0.0570,
+          "speedup": 1.1134,
+          "speedup_median": 1.0556,
+          "runs": 15
+        }
+      },
+      {
+        "round": 2,
+        "transformation": "interchange",
+        "function": "main",
+        "line": 22,
+        "description": "swap the loops over 'r' and 'i' (lines 22 and 23) in main",
+        "region": "main/L2",
+        "source": "compiler",
+        "explanation": "Swapping the two loops changes the order in which memory is visited (estimated memory lines 9.8 million to 1.9 million).",
+        "safety": "exact",
+        "status": "applied",
+        "legality_evidence": "checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 216000303.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 9750009.7500,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 294000381.0000
+          },
+          "after": {
+            "operations": 225000288.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 240000303.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0677,
+          "candidate_seconds": 0.0360,
+          "speedup": 1.8808,
+          "speedup_median": 1.8918,
+          "runs": 15
+        },
+        "code": {
+          "before": "int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n",
+          "after": "int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (i = 0; i < 3000003; i++) {\n        for (r = 0; r < 8; r++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n"
+        }
+      },
+      {
+        "round": 3,
+        "transformation": "unrolling",
+        "function": "main",
+        "line": 23,
+        "description": "unroll the loop over 'r' (line 23, 8 iterations) in main",
+        "region": "main/L3",
+        "source": "model",
+        "model_proposal": {
+          "rank": 2,
+          "explanation": "long streaming loop",
+          "expected_benefit": "less loop overhead",
+          "preconditions": "constant trip count",
+          "risks": "code size"
+        },
+        "explanation": "Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 225.0 million to 171.0 million). The iterations still run in exactly the original order.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed",
+        "legality_evidence": "unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (8) is a compile-time constant and 'r' is not modified in the body",
+        "suggested_by_advice": true,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 225000288.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 240000303.0000
+          },
+          "after": {
+            "operations": 171000234.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 186000249.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0400,
+          "candidate_seconds": 0.0401,
+          "speedup": 0.9973,
+          "speedup_median": 0.9998,
+          "runs": 15
+        }
+      },
+      {
+        "round": 3,
+        "transformation": "promotion",
+        "function": "main",
+        "line": 23,
+        "description": "keep a[i] in a register across the loop over 'r' (line 23) in main",
+        "region": "main/L3",
+        "source": "compiler",
+        "explanation": "The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 27.0 million and stores from 30.0 million to 30.0 million.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.00x best-of-15 (median 0.96x, 0.040 s to 0.040 s); 1.03x is needed",
+        "legality_evidence": "a[i] is the same element on every iteration; no other element of 'a' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 225000288.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 240000303.0000
+          },
+          "after": {
+            "operations": 204000267.0000,
+            "loads": 27000028.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 219000282.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0399,
+          "candidate_seconds": 0.0398,
+          "speedup": 1.0009,
+          "speedup_median": 0.9558,
+          "runs": 15
+        }
+      },
+      {
+        "round": 3,
+        "transformation": "promotion",
+        "function": "main",
+        "line": 23,
+        "description": "keep b[i] in a register across the loop over 'r' (line 23) in main",
+        "region": "main/L3",
+        "source": "compiler",
+        "explanation": "The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 27.0 million and stores from 30.0 million to 30.0 million.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed",
+        "legality_evidence": "b[i] is the same element on every iteration; no other element of 'b' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 225000288.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 240000303.0000
+          },
+          "after": {
+            "operations": 204000267.0000,
+            "loads": 27000028.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 219000282.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0401,
+          "candidate_seconds": 0.0400,
+          "speedup": 1.0043,
+          "speedup_median": 1.0002,
+          "runs": 15
+        }
+      },
+      {
+        "round": 3,
+        "transformation": "promotion",
+        "function": "main",
+        "line": 23,
+        "description": "keep c[i] in a register across the loop over 'r' (line 23) in main",
+        "region": "main/L3",
+        "source": "compiler",
+        "explanation": "The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 51.0 million and stores from 30.0 million to 9.0 million.",
+        "safety": "exact",
+        "status": "rejected",
+        "reason": "measured 1.01x best-of-15 (median 0.99x, 0.040 s to 0.040 s); 1.03x is needed",
+        "legality_evidence": "c[i] is the same element on every iteration; no other element of 'c' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed",
+        "suggested_by_advice": false,
+        "decided_by": "benchmark",
+        "model": {
+          "before": {
+            "operations": 225000288.0000,
+            "loads": 48000049.0000,
+            "stores": 30000030.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 240000303.0000
+          },
+          "after": {
+            "operations": 207000270.0000,
+            "loads": 51000052.0000,
+            "stores": 9000009.0000,
+            "estimated_dram_lines": 1875001.8750,
+            "strided_accesses": 0.0000,
+            "irregular_accesses": 0.0000,
+            "predicted_contention": 0.0000,
+            "model_cost": 222000285.0000
+          }
+        },
+        "differential_test": {
+          "passed": true,
+          "runs": 3,
+          "agreed": 3,
+          "note": "3 run(s) agreed (memory and output identical)"
+        },
+        "benchmark": {
+          "baseline_seconds": 0.0398,
+          "candidate_seconds": 0.0396,
+          "speedup": 1.0051,
+          "speedup_median": 0.9873,
+          "runs": 15
+        }
+      }
+    ]
+  },
+  "warnings": [
+    "no pthread_create call found: nothing to analyse"
+  ]
+}

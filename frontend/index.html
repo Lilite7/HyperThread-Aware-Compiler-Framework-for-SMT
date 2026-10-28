@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HT-Compass dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #E8EDEB;
+  --surface: #F6F8F7;
+  --ink: #16263A;
+  --ink-soft: #526377;
+  --line: #C3CDC9;
+  --accent: #2A55B8;
+  --accent-ink: #FFFFFF;
+  --cell-zero: #F1F3EF;
+  --danger: #A4133C;
+  --code-bg: #E1E8E5;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0F1925;
+    --surface: #162233;
+    --ink: #E5ECF3;
+    --ink-soft: #9AAEC3;
+    --line: #2A3B4F;
+    --accent: #7FA2F0;
+    --accent-ink: #0F1925;
+    --cell-zero: #1B2A3C;
+    --danger: #FF7A93;
+    --code-bg: #121E2C;
+  }
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0; color: var(--ink); background: var(--paper);
+  font: 400 15px/1.5 var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.6rem, 2.6vw + 0.6rem, 2.35rem); line-height: 1.15; max-width: 22ch; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1rem; }
+p { margin: 0; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* ---------- top bar ---------- */
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  padding: 14px clamp(16px, 4vw, 40px); border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.brand { display: flex; align-items: center; gap: 10px; font: 700 1.15rem var(--font-display); }
+.brand svg { width: 30px; height: 30px; }
+.src { color: var(--ink-soft); flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn {
+  border: 1.5px solid var(--line); background: transparent; border-radius: 8px;
+  padding: 7px 14px; cursor: pointer; font-weight: 600;
+}
+.btn:hover { border-color: var(--ink-soft); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+select.btn { padding-right: 8px; background: var(--surface); width: 7.5rem; }
+
+/* ---------- layout ---------- */
+main { padding: 0 clamp(16px, 4vw, 40px) 80px; max-width: 1240px; margin: 0 auto; }
+section { padding-top: 56px; }
+.lede { color: var(--ink-soft); max-width: 62ch; margin-top: 8px; }
+.sec-head { margin-bottom: 18px; }
+
+/* ---------- empty state ---------- */
+.empty { padding-top: 64px; }
+.drop {
+  margin-top: 24px; border: 2px dashed var(--line); border-radius: 14px;
+  padding: 28px clamp(18px, 4vw, 36px); max-width: 760px; background: var(--surface);
+}
+.drop ol { margin: 14px 0 20px; padding-left: 20px; color: var(--ink-soft); }
+.drop li { margin: 4px 0; }
+.drop code, .note code { font-family: var(--font-code); font-size: .88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+.drop .row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+body.dragging::after {
+  content: "Drop the report (.json) and optionally program_gen.c";
+  position: fixed; inset: 12px; z-index: 50; display: grid; place-items: center;
+  border: 3px dashed var(--accent); border-radius: 18px; background: color-mix(in srgb, var(--paper) 88%, transparent);
+  font: 700 1.3rem var(--font-display); pointer-events: none;
+}
+
+/* ---------- hero ---------- */
+.hero { padding-top: 40px; }
+.hero-head { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) minmax(260px, 380px); align-items: end; }
+@media (max-width: 820px) { .hero-head { grid-template-columns: 1fr; } }
+.strip { display: grid; gap: 8px; }
+.strip-row { display: grid; grid-template-columns: 7.5rem 1fr 3.2rem; gap: 10px; align-items: center; font-size: .9rem; color: var(--ink-soft); }
+.strip-row .bar { height: 10px; border-radius: 5px; background: var(--line); position: relative; overflow: hidden; }
+.strip-row .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; background: var(--ink-soft); }
+.strip-row .num { text-align: right; font-weight: 600; color: var(--ink); }
+.strip-row.cur { color: var(--ink); font-weight: 600; }
+.strip-row.cur .bar i { background: var(--accent); }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 30px 0 18px; }
+.tabs { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.tabs button { border: 0; background: transparent; padding: 7px 16px; cursor: pointer; font-weight: 600; color: var(--ink-soft); }
+.tabs button + button { border-left: 1.5px solid var(--line); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.toolbar .meta { color: var(--ink-soft); }
+
+/* ---------- core board ---------- */
+.board { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+.core {
+  border: 2px solid var(--ink); border-radius: 14px; padding: 12px 14px 14px; background: var(--surface);
+  display: grid; gap: 10px; align-content: start;
+}
+.core.idle { border: 2px dashed var(--line); background: transparent; color: var(--ink-soft); opacity: .8; }
+.core header { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.core header strong { font: 700 1rem var(--font-display); }
+.core header span { color: var(--ink-soft); font-size: .88rem; }
+.core .none { font-size: .9rem; }
+.pairrow { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); align-items: end; }
+.pairrow + .pairrow { border-top: 1px dashed var(--line); padding-top: 10px; }
+.slot { display: grid; gap: 4px; min-width: 0; }
+.slot .cpu { font-size: .78rem; color: var(--ink-soft); }
+.tile {
+  text-align: left; cursor: pointer; display: grid; gap: 1px; min-width: 0;
+  background: var(--paper); border: 1.5px solid var(--line); border-left: 6px solid var(--c, var(--ink-soft));
+  border-radius: 8px; padding: 8px 9px; min-height: 74px; align-content: center;
+}
+.tile:hover { border-color: var(--ink-soft); border-left-color: var(--c, var(--ink-soft)); }
+.tile.sel { box-shadow: 0 0 0 3px var(--accent); }
+.tile .tid { font-size: .74rem; color: var(--ink-soft); }
+.tile .tname { font-weight: 600; overflow-wrap: anywhere; line-height: 1.25; }
+.tile .tcls { font-size: .8rem; color: var(--ink-soft); }
+.slot.empty-slot .tile { border-style: dashed; background: transparent; cursor: default; color: var(--ink-soft); border-left-width: 1.5px; }
+.link {
+  --hc: var(--line); align-self: stretch; border: 0; background: none; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative;
+}
+.link::before { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 2px); height: 4px; background: var(--hc); }
+.link b {
+  position: relative; z-index: 1; min-width: 44px; padding: 2px 4px; text-align: center;
+  background: var(--surface); border: 3px solid var(--hc); border-radius: 999px; font: 700 .95rem var(--font-display);
+}
+.link small { position: relative; z-index: 1; background: var(--surface); padding: 0 4px; font-size: .72rem; color: var(--ink-soft); }
+.link.sel b { box-shadow: 0 0 0 3px var(--accent); }
+.link.alone::before { background: none; border-top: 3px dotted var(--line); height: 0; }
+.link.alone { cursor: default; }
+.link.alone b { border-color: var(--line); color: var(--ink-soft); font-size: .78rem; }
+
+/* ---------- threads table ---------- */
+.tablewrap { overflow-x: auto; border-top: 2px solid var(--ink); }
+table.threads { width: 100%; border-collapse: collapse; min-width: 720px; }
+.threads th { text-align: left; font-weight: 600; color: var(--ink-soft); padding: 10px 12px 8px 0; font-size: .88rem; white-space: nowrap; }
+.threads td { padding: 10px 12px 10px 0; border-top: 1px solid var(--line); vertical-align: middle; }
+.threads td.num, .threads th.num { text-align: right; padding-right: 22px; }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 3px; background: var(--c); margin-right: 8px; vertical-align: -1px; }
+.demand { display: inline-grid; grid-auto-flow: column; gap: 4px; align-items: end; height: 30px; }
+.demand i { display: block; width: 11px; border-radius: 2px 2px 0 0; background: var(--ink-soft); min-height: 2px; opacity: .8; }
+.demand i:last-child { background: var(--accent); opacity: 1; }
+.threads tr.sel td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.threads td .tid { color: var(--ink-soft); margin-right: 6px; font-size: .85rem; }
+
+/* ---------- matrix + detail ---------- */
+.mx-layout { display: grid; gap: 36px; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); align-items: start; }
+@media (max-width: 960px) { .mx-layout { grid-template-columns: 1fr; } }
+.mx-scroll { overflow-x: auto; padding-bottom: 6px; }
+.matrix { display: grid; gap: 3px; width: max-content; }
+.matrix .ch, .matrix .rh { font-size: .8rem; color: var(--ink-soft); align-self: center; }
+.matrix .ch { text-align: center; }
+.matrix .rh { padding-right: 8px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.matrix .rh b { color: var(--ink); font-weight: 600; margin-right: 4px; }
+.cell {
+  width: var(--cs); height: var(--cs); border: 0; border-radius: 5px; cursor: pointer; padding: 0;
+  font: 600 .8rem var(--font-body); background: var(--cell-zero); color: var(--ink);
+}
+.cell.diag { cursor: default; background: transparent; border: 1px dashed var(--line); }
+.cell.never {
+  background: repeating-linear-gradient(135deg, var(--cell-zero) 0 5px, var(--line) 5px 6px); color: var(--ink-soft);
+}
+.cell.placed { box-shadow: inset 0 0 0 3px var(--ink); }
+.cell.sel { outline: 3px solid var(--accent); outline-offset: 1px; z-index: 1; position: relative; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 14px; font-size: .85rem; color: var(--ink-soft); align-items: center; }
+.legend .ramp { width: 140px; height: 10px; border-radius: 5px; }
+.legend .sw { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; }
+
+.detail { border-left: 2px solid var(--ink); padding-left: 22px; display: grid; gap: 14px; }
+@media (max-width: 960px) { .detail { border-left: 0; border-top: 2px solid var(--ink); padding: 18px 0 0; } }
+.detail h3 { font-size: 1.15rem; }
+.score-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.score-line .big { font: 700 2.2rem/1 var(--font-display); }
+.sev { font-weight: 600; padding: 1px 9px; border-radius: 999px; border: 2px solid var(--hc, var(--line)); font-size: .85rem; }
+.comp { display: grid; gap: 3px; }
+.comp .l { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.comp .l span:last-child { font-weight: 400; color: var(--ink-soft); }
+.comp .bar { height: 9px; background: var(--line); border-radius: 5px; overflow: hidden; }
+.comp .bar i { display: block; height: 100%; background: var(--ink); border-radius: 5px; }
+.comp p { font-size: .84rem; color: var(--ink-soft); }
+.calc { font-size: .9rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 10px; }
+.calc b { color: var(--ink); }
+.detail ul { margin: 0; padding-left: 18px; }
+.detail li { margin: 3px 0; }
+
+/* ---------- ranked pairs ---------- */
+.ranked { display: grid; gap: 2px; max-width: 760px; }
+.ranked button {
+  display: grid; grid-template-columns: minmax(0, 1fr) 120px 3.4rem; gap: 14px; align-items: center; text-align: left;
+  background: transparent; border: 0; border-top: 1px solid var(--line); padding: 9px 4px; cursor: pointer;
+}
+.ranked button:hover, .ranked button.sel { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.ranked .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.ranked .bar i { display: block; height: 100%; border-radius: 4px; }
+.ranked .sc { text-align: right; font-weight: 700; }
+.ranked small { color: var(--ink-soft); margin-left: 8px; }
+
+/* ---------- topology / warnings ---------- */
+.facts { display: grid; gap: 6px 28px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); max-width: 880px; margin-bottom: 16px; }
+.facts div span { display: block; color: var(--ink-soft); font-size: .85rem; }
+.facts .wide { grid-column: 1 / -1; }
+.facts div strong { font: 700 1.1rem var(--font-display); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span { border: 1.5px solid var(--line); border-radius: 8px; padding: 3px 10px; font-size: .88rem; }
+.warn { margin-top: 20px; padding: 12px 16px; border-left: 4px solid var(--danger); background: color-mix(in srgb, var(--danger) 8%, transparent); max-width: 880px; }
+.warn ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* ---------- code ---------- */
+.codebar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.codewrap { background: var(--code-bg); border-radius: 10px; overflow: auto; max-height: 520px; }
+.codewrap pre { margin: 0; padding: 14px 0; font: 400 .82rem/1.55 var(--font-code); }
+.codewrap .ln { display: block; padding: 0 16px; white-space: pre; }
+.codewrap .ln.hl { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.note { color: var(--ink-soft); padding: 18px 0; }
+
+/* ---------- analyze dialog ---------- */
+dialog {
+  width: min(1040px, calc(100vw - 24px)); max-height: calc(100vh - 24px); padding: 0; border: 0; border-radius: 14px;
+  background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+dialog::backdrop { background: rgba(10, 20, 32, .55); }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.dlg-body { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px; padding: 18px 22px 22px; }
+@media (max-width: 820px) { .dlg-body { grid-template-columns: 1fr; } }
+.editor { display: grid; grid-template-columns: auto 1fr; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--code-bg); height: min(440px, 52vh); }
+.gutter { overflow: hidden; padding: 10px 0; text-align: right; color: var(--ink-soft); font: 400 .82rem/1.55 var(--font-code); user-select: none; border-right: 1px solid var(--line); }
+.gutter span { display: block; padding: 0 10px 0 14px; }
+.gutter span.err { background: var(--danger); color: #fff; }
+.editor textarea { border: 0; resize: none; padding: 10px 12px; background: transparent; font: 400 .82rem/1.55 var(--font-code); white-space: pre; overflow: auto; outline-offset: -3px; }
+.opts { display: grid; gap: 14px; align-content: start; }
+.opts label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
+.opts label span { font-weight: 400; color: var(--ink-soft); font-size: .82rem; }
+.opts select, .opts input { border: 1.5px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--paper); font-weight: 400; }
+.errbox { grid-column: 1 / -1; white-space: pre-wrap; font: 400 .85rem/1.5 var(--font-code); border-left: 4px solid var(--danger); background: color-mix(in srgb, var(--danger) 9%, transparent); padding: 10px 14px; border-radius: 4px; }
+.srvnote { grid-column: 1 / -1; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper);
+  padding: 10px 18px; border-radius: 10px; font-weight: 600; z-index: 100; max-width: min(90vw, 560px);
+}
+
+/* ---------- code changes (optimizer) ---------- */
+.opt-facts { display: grid; gap: 6px 28px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 920px; margin-bottom: 26px; }
+.opt-facts div span { display: block; color: var(--ink-soft); font-size: .85rem; }
+.opt-facts div strong { font: 700 1.1rem var(--font-display); }
+.opt-list { display: grid; max-width: 920px; border-top: 2px solid var(--ink); }
+.opt-item { --st: var(--line); padding: 16px 0 16px 18px; border-bottom: 1px solid var(--line); border-left: 5px solid var(--st); display: grid; gap: 8px; }
+.opt-item header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.opt-item header strong { font: 700 1.02rem var(--font-display); }
+.opt-item header .where { color: var(--ink-soft); font-size: .9rem; }
+.opt-item .chip { font-size: .8rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; border: 1.5px solid var(--st); white-space: nowrap; }
+.opt-item.st-applied { --st: var(--accent); }
+.opt-item.st-applied .chip { background: var(--accent); color: var(--accent-ink); }
+.opt-item.st-passed { --st: var(--accent); }
+.opt-item.st-rejected, .opt-item.st-reverted { --st: var(--ink-soft); }
+.opt-item.st-skipped { --st: var(--line); }
+.opt-item.st-skipped, .opt-item.st-found { opacity: .85; }
+.opt-item.st-caught { --st: var(--danger); }
+.opt-item.st-caught .chip { color: var(--danger); }
+.opt-item p { max-width: 74ch; }
+.opt-item dl { display: grid; grid-template-columns: 8.2rem minmax(0, 1fr); gap: 3px 16px; margin: 0; font-size: .92rem; }
+.opt-item dt { color: var(--ink-soft); }
+.opt-item dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .opt-item dl { grid-template-columns: 1fr; } .opt-item dt { margin-top: 6px; } }
+.diff { font: 400 .8rem/1.5 var(--font-code); background: var(--code-bg); border-radius: 8px; padding: 10px 0; overflow: auto; max-height: 340px; }
+.diff .l { display: block; padding: 0 14px; white-space: pre; }
+.diff .add { background: color-mix(in srgb, #3C8D5A 24%, transparent); }
+.diff .del { background: color-mix(in srgb, var(--danger) 18%, transparent); }
+.diff .gap { color: var(--ink-soft); }
+details.more > summary, .opt-item details > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+details.more { max-width: 920px; margin-top: 20px; }
+.proof-note { max-width: 74ch; color: var(--ink-soft); font-size: .9rem; margin-top: 18px; }
+.advice { max-width: 920px; margin-top: 28px; border: 1.5px solid var(--line); border-radius: 12px; padding: 4px 18px 14px; background: var(--surface); }
+.advice > summary { cursor: pointer; font-weight: 600; padding: 12px 0 6px; }
+.advice p { color: var(--ink-soft); margin: 4px 0 10px; max-width: 70ch; }
+.advice .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.advice pre { margin: 8px 0; max-height: 220px; overflow: auto; background: var(--code-bg); border-radius: 8px; padding: 10px 14px; font: 400 .8rem/1.5 var(--font-code); white-space: pre-wrap; }
+.advice textarea { width: 100%; min-height: 84px; border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--paper); font: 400 .85rem/1.5 var(--font-code); }
+fieldset.optbox { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px 12px; margin: 0; display: grid; gap: 8px; }
+fieldset.optbox legend { font-weight: 600; font-size: .9rem; padding: 0 6px; }
+fieldset.optbox label { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; font-size: .9rem; }
+fieldset.optbox label input { margin-top: 3px; width: auto; }
+fieldset.optbox .warnline { color: var(--ink-soft); font-size: .82rem; }
+
+
+/* ---------- AI optimization panel ---------- */
+.ai-panel { max-width: 920px; border: 2px solid var(--ink); border-radius: 14px; padding: 16px 20px 18px; margin-bottom: 30px; background: var(--surface); display: grid; gap: 14px; }
+.ai-panel.fail { border-color: var(--danger); }
+.ai-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.ai-head h3 { font-size: 1.15rem; }
+.ai-head .model { color: var(--ink-soft); }
+.badge { font-size: .8rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; border: 1.5px solid var(--ink-soft); white-space: nowrap; }
+.badge.live { border-color: var(--accent); color: var(--accent); }
+.badge.mock { border-color: #B7791F; color: #B7791F; }
+.badge.off { border-color: var(--ink-soft); color: var(--ink-soft); }
+.badge.bad { border-color: var(--danger); color: var(--danger); }
+.ai-stats { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.ai-stats span { display: block; color: var(--ink-soft); font-size: .82rem; }
+.ai-stats strong { font: 700 1rem var(--font-display); }
+.ai-notes { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: .9rem; }
+.ai-props { display: grid; border-top: 1.5px solid var(--ink); }
+.ai-prop { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.ai-prop .top { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.ai-prop .rank { font: 700 .95rem var(--font-display); color: var(--ink-soft); min-width: 1.6rem; }
+.ai-prop strong { font: 700 1rem var(--font-display); }
+.ai-prop .region { color: var(--ink-soft); font-size: .9rem; }
+.ai-prop p { color: var(--ink); font-size: .92rem; max-width: 76ch; }
+.ai-prop dl { display: grid; grid-template-columns: 8.4rem minmax(0, 1fr); gap: 3px 16px; margin: 0; font-size: .88rem; }
+.ai-prop dt { color: var(--ink-soft); } .ai-prop dd { margin: 0; overflow-wrap: anywhere; }
+.pill { font-size: .78rem; font-weight: 600; padding: 0 9px; border-radius: 999px; border: 1.5px solid var(--ink-soft); }
+.pill.yes { border-color: var(--accent); color: var(--accent); }
+.pill.no { border-color: var(--danger); color: var(--danger); }
+.pill.applied { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.rawreply { max-height: 220px; overflow: auto; background: var(--code-bg); border-radius: 8px; padding: 10px 14px; font: 400 .78rem/1.5 var(--font-code); white-space: pre-wrap; margin: 8px 0 0; }
+.ai-line { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .88rem; }
+.ai-line .dotc { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-soft); display: inline-block; }
+.ai-line .dotc.ok { background: #3C8D5A; } .ai-line .dotc.no { background: var(--danger); }
+.errbox h4 { margin: 0 0 6px; font: 700 1rem var(--font-display); color: var(--danger); }
+.errbox code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand" aria-label="HT-Compass">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="6.5" y="11" width="8" height="10" rx="2" fill="#3A6EA5"/><rect x="17.5" y="11" width="8" height="10" rx="2" fill="#5E9442"/><path d="M14.5 16h3" stroke="currentColor" stroke-width="2.4"/></svg>
+    HT-Compass
+  </div>
+  <div class="src" id="srcName">No report loaded</div>
+  <div class="actions">
+    <button class="btn" id="btnOpen">Open report</button>
+    <select class="btn" id="sampleSel" aria-label="Load a sample report">
+      <option value="">Samples</option>
+    </select>
+    <button class="btn primary" id="btnAnalyze">Analyze code</button>
+  </div>
+  <input type="file" id="fileIn" accept=".json,.c,.txt" multiple hidden>
+</header>
+
+<main id="main">
+  <!-- shown until a report is loaded -->
+  <section class="empty" id="empty">
+    <h1>See which threads fight over a core</h1>
+    <p class="lede">HT-Compass predicts how much threads slow each other down when they share a physical core, then chooses the pairing that hurts least. This page shows its report.</p>
+    <div class="drop">
+      <h3>Load a report</h3>
+      <ol>
+        <li>Compile your program: <code>./htcompiler prog.c --json prog.htmeta.json -o prog_gen.c</code></li>
+        <li>Drop <code>prog.htmeta.json</code> on this page. Add <code>prog_gen.c</code> to see the generated code too.</li>
+      </ol>
+      <div class="row-btns">
+        <button class="btn primary" data-sample="mixed">Try the streaming and compute sample</button>
+        <button class="btn" data-sample="loops">Try the loop-created threads sample</button>
+        <button class="btn" id="btnOpen2">Choose files</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+    <!-- hero: placement board -->
+    <section class="hero" id="hero" aria-labelledby="heroTitle">
+      <div class="hero-head">
+        <div>
+          <h1 id="heroTitle"></h1>
+          <p class="lede" id="heroSub"></p>
+        </div>
+        <div class="strip" id="strip" role="list" aria-label="Predicted contention by pairing strategy"></div>
+      </div>
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="Mapping to display" id="mapTabs"></div>
+        <span class="meta" id="mapMeta"></span>
+      </div>
+      <div class="board" id="board"></div>
+    </section>
+
+
+    <section id="secOpt" hidden>
+      <div class="sec-head">
+        <h2>Code changes</h2>
+        <p class="lede" id="optLede"></p>
+      </div>
+      <div class="ai-panel" id="aiPanel" hidden></div>
+      <div class="opt-facts" id="optFacts"></div>
+      <div class="opt-list" id="optApplied"></div>
+      <details class="more" id="optOthers"><summary id="optOthersSum"></summary><div class="opt-list" id="optOthersList"></div></details>
+      <p class="proof-note" id="optNote"></p>
+      <details class="advice" id="advice">
+        <summary>Manual alternative: ask any chat AI yourself (optional)</summary>
+        <p>The compiler finds opportunities by itself. You can also ask any chat AI for suggestions: copy the prompt, paste the reply below, and run again. Suggestions are only tried first; the compiler still proves each one safe and tests it, so a wrong suggestion is simply rejected.</p>
+        <div class="row">
+          <button class="btn" id="btnPrompt">Prepare prompt</button>
+          <button class="btn" id="btnCopyPrompt" hidden>Copy prompt</button>
+        </div>
+        <pre id="promptBox" hidden></pre>
+        <label for="adviceText" class="sr">The AI's reply</label>
+        <textarea id="adviceText" spellcheck="false" placeholder="Paste the AI's reply here, one suggestion per line, for example:&#10;interchange col_walk 46"></textarea>
+        <div class="row"><button class="btn primary" id="btnAdvice">Check this advice</button><span class="note" id="adviceMsg"></span></div>
+      </details>
+    </section>
+
+    <section id="secThreads">
+      <div class="sec-head">
+        <h2>Threads</h2>
+        <p class="lede">What each thread does, estimated from its code. The five bars show the share of its operations that are integer, floating-point, divide or math, load/store, and memory traffic from beyond the L2 cache (blue).</p>
+      </div>
+      <div class="tablewrap"><table class="threads" id="threadTbl"></table></div>
+    </section>
+
+    <section id="secMatrix">
+      <div class="sec-head">
+        <h2>Who clashes with whom</h2>
+        <p class="lede">Contention score from 0 to 100 if the two threads share a core. Select a cell to see where the score comes from.</p>
+      </div>
+      <div class="mx-layout">
+        <div>
+          <div class="mx-scroll"><div class="matrix" id="matrix" role="grid" aria-label="Pairwise contention scores"></div></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <aside class="detail" id="detail" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <section id="secRanked">
+      <div class="sec-head"><h2>Highest-scoring pairs</h2></div>
+      <div class="ranked" id="ranked"></div>
+    </section>
+
+    <section id="secTopo">
+      <div class="sec-head"><h2>Machine and model</h2></div>
+      <div class="facts" id="facts"></div>
+      <div class="chips" id="sibs" aria-label="SMT sibling CPUs per core"></div>
+      <div id="warns"></div>
+    </section>
+
+    <section id="secCode">
+      <div class="sec-head"><h2>Output files</h2></div>
+      <div class="codebar">
+        <div class="tabs" role="tablist" aria-label="File to display" id="codeTabs"></div>
+        <div class="actions"><button class="btn" id="btnCopy">Copy</button><button class="btn" id="btnDl">Download</button></div>
+      </div>
+      <p class="note" id="codeNote" hidden>Drop <code>program_gen.c</code> on this page, or use Analyze code, to see the generated program here.</p>
+      <div class="codewrap" id="codeWrap"></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg-head">
+    <h2 id="dlgTitle">Analyze a C program</h2>
+    <button class="btn" id="dlgClose">Close</button>
+  </div>
+  <div class="dlg-body">
+    <div class="editor">
+      <div class="gutter" id="gutter" aria-hidden="true"></div>
+      <textarea id="src" spellcheck="false" wrap="off" aria-label="C source code"></textarea>
+    </div>
+    <div class="opts">
+      <label>Policy
+        <select id="optPolicy"><option value="pack">pack: pair up all threads</option><option value="spread">spread: share only when forced</option></select>
+      </label>
+      <label>Mapping to emit
+        <select id="optStrategy"><option value="optimized">optimized</option><option value="naive">creation order</option><option value="worst">worst case</option></select>
+      </label>
+      <label>Target topology <span>Sibling CPUs per core, e.g. 0,4;1,5;2,6;3,7. Leave empty to read this machine.</span>
+        <input id="optTopo" placeholder="0,4;1,5;2,6;3,7" autocomplete="off">
+      </label>
+      <label>Physical cores to use <span>Empty uses all.</span>
+        <input id="optCores" type="number" min="1" max="256" placeholder="all">
+      </label>
+      <fieldset class="optbox">
+        <legend>Optimization</legend>
+        <label><input type="checkbox" id="optOpt"> <span>Optimize the code first (interchange, fusion, promotion, unrolling, loop-invariant code motion)</span></label>
+        <label style="display:grid;gap:4px"><span>Where the opportunities come from</span>
+          <select id="optSource">
+            <option value="ai">Local AI (Ollama): the model proposes, the compiler checks every proposal</option>
+            <option value="offline">Offline rules: the compiler's own finders, no AI</option>
+          </select></label>
+        <div class="ai-line" id="aiStatusLine"><span class="dotc"></span><span>Checking the local model…</span><button class="btn" type="button" id="btnAiCheck">Check again</button></div>
+        <label><input type="checkbox" id="optBench" checked> <span>Time each change and keep it only if it is faster</span></label>
+        <label><input type="checkbox" id="optFp"> <span>Allow changes that alter floating-point rounding</span></label>
+        <span class="warnline">Optimizing builds and runs your program on this machine, several times.</span>
+      </fieldset>
+      <button class="btn primary" id="btnRun">Analyze</button>
+    </div>
+    <div class="errbox" id="errBox" hidden></div>
+    <div class="srvnote note" id="srvNote" hidden></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script id="samples" type="application/json">{"mixed":{"title":"Streaming and compute threads (mixed.c)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/mixed.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":4,"threads":4,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[{"id":0,"name":"stream_a","worker":"stream_a","create_line":74,"handle":"t","created_in":"main","class":"memory-bound","start_event":0,"end_event":4,"assigned_core":0,"assigned_cpu":0,"profile":{"int_ops":40000020.0,"fp_ops":40000000.0,"heavy_ops":0.0,"loads":40000000.0,"stores":20000000.0,"branches":20000010.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":160000030.0,"estimated_dram_lines":7500000.0,"working_set_bytes":48000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":60000000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.75}},"arrays":[{"name":"b","scope":"global","bytes":16000000,"reads":20000000.0,"writes":0.0,"footprint_bytes":16000000.0},{"name":"c","scope":"global","bytes":16000000,"reads":20000000.0,"writes":0.0,"footprint_bytes":16000000.0},{"name":"a","scope":"global","bytes":16000000,"reads":0.0,"writes":20000000.0,"footprint_bytes":16000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":1,"name":"stream_b","worker":"stream_b","create_line":75,"handle":"t","created_in":"main","class":"memory-bound","start_event":1,"end_event":4,"assigned_core":1,"assigned_cpu":1,"profile":{"int_ops":40000020.0,"fp_ops":40000000.0,"heavy_ops":0.0,"loads":40000000.0,"stores":20000000.0,"branches":20000010.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":160000030.0,"estimated_dram_lines":7500000.0,"working_set_bytes":48000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":60000000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.75}},"arrays":[{"name":"y","scope":"global","bytes":16000000,"reads":20000000.0,"writes":0.0,"footprint_bytes":16000000.0},{"name":"z","scope":"global","bytes":16000000,"reads":20000000.0,"writes":0.0,"footprint_bytes":16000000.0},{"name":"x","scope":"global","bytes":16000000,"reads":0.0,"writes":20000000.0,"footprint_bytes":16000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":2,"name":"fp_compute_1","worker":"fp_compute_1","create_line":76,"handle":"t","created_in":"main","class":"compute-bound (floating point)","start_event":2,"end_event":4,"assigned_core":0,"assigned_cpu":4,"profile":{"int_ops":60000000.0,"fp_ops":60000000.0,"heavy_ops":0.0,"loads":0.0,"stores":0.0,"branches":30000000.0,"io_ops":50.0,"lock_ops":0.0,"total_ops":150000050.0,"estimated_dram_lines":0.0,"working_set_bytes":0.0,"assumed_trip_counts":0,"access_patterns":{"sequential":0.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.4,"floating_point":0.4,"heavy_math":0.0,"load_store":0.0,"memory_bandwidth":0.0}},"arrays":[],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":3,"name":"fp_compute_2","worker":"fp_compute_2","create_line":77,"handle":"t","created_in":"main","class":"compute-bound (floating point)","start_event":3,"end_event":4,"assigned_core":1,"assigned_cpu":5,"profile":{"int_ops":60000000.0,"fp_ops":60000000.0,"heavy_ops":0.0,"loads":0.0,"stores":0.0,"branches":30000000.0,"io_ops":50.0,"lock_ops":0.0,"total_ops":150000050.0,"estimated_dram_lines":0.0,"working_set_bytes":0.0,"assumed_trip_counts":0,"access_patterns":{"sequential":0.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.4,"floating_point":0.4,"heavy_math":0.0,"load_store":0.0,"memory_bandwidth":0.0}},"arrays":[],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]}],"contention_pairs":[{"a":0,"b":1,"score":62.125,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.75,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 91.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy"]},{"a":0,"b":2,"score":8.7188,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.9688,"lock_factor":1.0},"conflicts":["execution units: both threads demand floating-point units"]},{"a":0,"b":3,"score":8.7188,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.9688,"lock_factor":1.0},"conflicts":["execution units: both threads demand floating-point units"]},{"a":1,"b":2,"score":8.7188,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.9688,"lock_factor":1.0},"conflicts":["execution units: both threads demand floating-point units"]},{"a":1,"b":3,"score":8.7188,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.9688,"lock_factor":1.0},"conflicts":["execution units: both threads demand floating-point units"]},{"a":2,"b":3,"score":14.4,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.48,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["execution units: both threads demand floating-point units"]}],"high_contention_pairs":[[0,1]],"mapping":{"strategy_emitted":"optimized","policy":"pack","naive_total":76.525,"optimized_total":17.4375,"worst_total":76.525,"predicted_reduction_vs_naive_percent":77.2133,"emitted":{"algorithm":"exact-dp","predicted_total_contention":17.4375,"cores":[{"core":0,"cpus":[0,4],"threads":[0,2],"pair_score":8.7188,"advice":"low contention: SMT co-location is beneficial"},{"core":1,"cpus":[1,5],"threads":[1,3],"pair_score":8.7188,"advice":"low contention: SMT co-location is beneficial"}]},"optimized":{"algorithm":"exact-dp","predicted_total_contention":17.4375,"cores":[{"core":0,"cpus":[0,4],"threads":[0,2],"pair_score":8.7188,"advice":"low contention: SMT co-location is beneficial"},{"core":1,"cpus":[1,5],"threads":[1,3],"pair_score":8.7188,"advice":"low contention: SMT co-location is beneficial"}]},"naive":{"algorithm":"creation-order","predicted_total_contention":76.525,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":62.125,"advice":"high contention: prefer separate cores if available"},{"core":1,"cpus":[1,5],"threads":[2,3],"pair_score":14.4,"advice":"low contention: SMT co-location is beneficial"}]}},"warnings":[]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/mixed.c (2026-10-24 14:56)\n * Mapping strategy: optimized (exact-dp), policy: pack\n * Predicted contention of this mapping: 17.4\n *   core 0 (CPU 0 4): T0 stream_a + T2 fp_compute_1\n *   core 1 (CPU 1 5): T1 stream_b + T3 fp_compute_2\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#include <pthread.h>\n#define N      2000000\n#define REPS   10\n#define ITERS  30000000\n#include <sched.h>\n\n/* ---- HT-Compass: compile-time thread-to-CPU map ---- */\n#define HT_NUM_THREADS 4\nstatic const int __ht_cpu_map[HT_NUM_THREADS] = { 0, 1, 4, 5 };\n\nstatic int __ht_create(pthread_t *t, void *(*fn)(void *), void *arg, int idx)\n{\n    /* Pin the new thread via its attribute so it never runs on another CPU. */\n    if (idx >= 0 && idx < HT_NUM_THREADS && __ht_cpu_map[idx] >= 0 &&\n        __ht_cpu_map[idx] < CPU_SETSIZE) {\n        pthread_attr_t attr;\n        cpu_set_t set;\n        int rc = -1;\n        CPU_ZERO(&set);\n        CPU_SET(__ht_cpu_map[idx], &set);\n        pthread_attr_init(&attr);\n        if (pthread_attr_setaffinity_np(&attr, sizeof(set), &set) == 0)\n            rc = pthread_create(t, &attr, fn, arg);\n        pthread_attr_destroy(&attr);\n        if (rc == 0) return 0;\n    }\n    return pthread_create(t, NULL, fn, arg);   /* CPU absent: run unpinned */\n}\n\n/* ---- forward declarations ---- */\nvoid *stream_a(void *arg);\nvoid *stream_b(void *arg);\nvoid *fp_compute_1(void *arg);\nvoid *fp_compute_2(void *arg);\n\n/* ---- program ---- */\ndouble a[2000000];\ndouble b[2000000];\ndouble c[2000000];\ndouble x[2000000];\ndouble y[2000000];\ndouble z[2000000];\npthread_t t[4];\n\nvoid *stream_a(void *arg) {\n    int r;\n    int i;\n    for (r = 0; r < 10; r++) {\n        for (i = 0; i < 2000000; i++) {\n            a[i] = b[i] * 3.0 + c[i];\n        }\n    }\n    return NULL;\n}\n\nvoid *stream_b(void *arg) {\n    int r;\n    int i;\n    for (r = 0; r < 10; r++) {\n        for (i = 0; i < 2000000; i++) {\n            x[i] = y[i] * 2.0 + z[i];\n        }\n    }\n    return NULL;\n}\n\nvoid *fp_compute_1(void *arg) {\n    double s = 1.0;\n    int i;\n    for (i = 0; i < 30000000; i++) {\n        s = s * 1.0000001 + 0.5;\n    }\n    printf(\"fp_compute_1 = %f\\n\", s);\n    return NULL;\n}\n\nvoid *fp_compute_2(void *arg) {\n    double s = 2.0;\n    int i;\n    for (i = 0; i < 30000000; i++) {\n        s = s * 0.9999999 + 0.25;\n    }\n    printf(\"fp_compute_2 = %f\\n\", s);\n    return NULL;\n}\n\nint main(void) {\n    int i;\n    for (i = 0; i < 2000000; i++) {\n        b[i] = 1.0;\n        c[i] = 2.0;\n        y[i] = 3.0;\n        z[i] = 4.0;\n    }\n    __ht_create(&t[0], stream_a, NULL, 0);\n    __ht_create(&t[1], stream_b, NULL, 1);\n    __ht_create(&t[2], fp_compute_1, NULL, 2);\n    __ht_create(&t[3], fp_compute_2, NULL, 3);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    pthread_join(t[2], NULL);\n    pthread_join(t[3], NULL);\n    printf(\"done a[5]=%f x[5]=%f\\n\", a[5], x[5]);\n    return 0;\n}\n","source":"/* mixed.c - two memory-streaming threads and two FP-compute threads.\n * A good SMT mapping pairs each streaming thread with a compute thread. */\n#include <stdio.h>\n#include <pthread.h>\n\n#define N      2000000\n#define REPS   10\n#define ITERS  30000000\n\ndouble a[N];\ndouble b[N];\ndouble c[N];\ndouble x[N];\ndouble y[N];\ndouble z[N];\n\npthread_t t[4];\n\nvoid *stream_a(void *arg)\n{\n    int r;\n    int i;\n    for (r = 0; r < REPS; r++) {\n        for (i = 0; i < N; i++) {\n            a[i] = b[i] * 3.0 + c[i];\n        }\n    }\n    return NULL;\n}\n\nvoid *stream_b(void *arg)\n{\n    int r;\n    int i;\n    for (r = 0; r < REPS; r++) {\n        for (i = 0; i < N; i++) {\n            x[i] = y[i] * 2.0 + z[i];\n        }\n    }\n    return NULL;\n}\n\nvoid *fp_compute_1(void *arg)\n{\n    double s = 1.0;\n    int i;\n    for (i = 0; i < ITERS; i++) {\n        s = s * 1.0000001 + 0.5;\n    }\n    printf(\"fp_compute_1 = %f\\n\", s);\n    return NULL;\n}\n\nvoid *fp_compute_2(void *arg)\n{\n    double s = 2.0;\n    int i;\n    for (i = 0; i < ITERS; i++) {\n        s = s * 0.9999999 + 0.25;\n    }\n    printf(\"fp_compute_2 = %f\\n\", s);\n    return NULL;\n}\n\nint main(void)\n{\n    int i;\n    for (i = 0; i < N; i++) {\n        b[i] = 1.0;\n        c[i] = 2.0;\n        y[i] = 3.0;\n        z[i] = 4.0;\n    }\n    pthread_create(&t[0], NULL, stream_a, NULL);\n    pthread_create(&t[1], NULL, stream_b, NULL);\n    pthread_create(&t[2], NULL, fp_compute_1, NULL);\n    pthread_create(&t[3], NULL, fp_compute_2, NULL);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    pthread_join(t[2], NULL);\n    pthread_join(t[3], NULL);\n    printf(\"done a[5]=%f x[5]=%f\\n\", a[5], x[5]);\n    return 0;\n}\n"},"walk":{"title":"Optimized thread workers (threads_walk.c)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/opt/threads_walk.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":2,"threads":2,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[{"id":0,"name":"w1","worker":"w1","create_line":41,"handle":"t","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":0,"assigned_cpu":0,"profile":{"int_ops":6483600.0,"fp_ops":3240000.0,"heavy_ops":0.0,"loads":3240000.0,"stores":3240000.0,"branches":3241800.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":19445400.0,"estimated_dram_lines":810000.0,"working_set_bytes":51840000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":6480000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.3334,"floating_point":0.1666,"heavy_math":0.0,"load_store":0.3332,"memory_bandwidth":0.6665}},"arrays":[{"name":"a1","scope":"global","bytes":25920000,"reads":3240000.0,"writes":0.0,"footprint_bytes":25920000.0},{"name":"b1","scope":"global","bytes":25920000,"reads":0.0,"writes":3240000.0,"footprint_bytes":25920000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":1,"name":"w2","worker":"w2","create_line":42,"handle":"t","created_in":"main","class":"memory-bound","start_event":1,"end_event":2,"assigned_core":0,"assigned_cpu":4,"profile":{"int_ops":6483600.0,"fp_ops":6480000.0,"heavy_ops":0.0,"loads":3240000.0,"stores":3240000.0,"branches":3241800.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":22685400.0,"estimated_dram_lines":810000.0,"working_set_bytes":51840000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":6480000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.2858,"floating_point":0.2856,"heavy_math":0.0,"load_store":0.2856,"memory_bandwidth":0.5713}},"arrays":[{"name":"a2","scope":"global","bytes":25920000,"reads":3240000.0,"writes":0.0,"footprint_bytes":25920000.0},{"name":"b2","scope":"global","bytes":25920000,"reads":0.0,"writes":3240000.0,"footprint_bytes":25920000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]}],"contention_pairs":[{"a":0,"b":1,"score":50.0064,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.2476,"load_store":0.2856,"cache":1.0,"memory_bandwidth":0.5713,"overlap_factor":0.9286,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 98.9 MiB vs shared L1D 48.0 KiB"]}],"high_contention_pairs":[[0,1]],"mapping":{"strategy_emitted":"optimized","policy":"pack","naive_total":50.0064,"optimized_total":50.0064,"worst_total":50.0064,"predicted_reduction_vs_naive_percent":0.0,"emitted":{"algorithm":"exact-dp","predicted_total_contention":50.0064,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":50.0064,"advice":"high contention: prefer separate cores if available"}]},"optimized":{"algorithm":"exact-dp","predicted_total_contention":50.0064,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":50.0064,"advice":"high contention: prefer separate cores if available"}]},"naive":{"algorithm":"creation-order","predicted_total_contention":50.0064,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":50.0064,"advice":"high contention: prefer separate cores if available"}]}},"optimization":{"plan_only":false,"settings":{"fp_reassociation_allowed":false,"differential_test":true,"benchmark_selection":true,"min_speedup":1.03,"benchmark_runs":5,"random_data_seeds":2},"c_compiler_available":true,"baseline_runs_cleanly":true,"applied":2,"model_before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"model_after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":55090854.0},"end_to_end_timing":{"original_seconds":0.0741,"optimized_seconds":0.0321,"speedup":2.3089},"candidates":[{"round":1,"transformation":"interchange","function":"w1","line":19,"description":"swap the loops over 'j' and 'i' (lines 19 and 20) in w1","explanation":"The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":52.6581,"model_cost":100450854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0729,"candidate_seconds":0.0528,"speedup":1.3818,"speedup_median":1.4376,"runs":15},"code":{"before":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n","after":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n"}},{"round":1,"transformation":"interchange","function":"w2","line":31,"description":"swap the loops over 'j' and 'i' (lines 31 and 32) in w2","explanation":"The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).","safety":"exact","status":"passed","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":100450854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0757,"candidate_seconds":0.0541,"speedup":1.3979,"speedup_median":1.4334,"runs":15}},{"round":2,"transformation":"interchange","function":"w2","line":31,"description":"swap the loops over 'j' and 'i' (lines 31 and 32) in w2","explanation":"The inner loop currently walks arrays with a large stride (6.5 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 7.3 million to 1.6 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":52.6581,"model_cost":100450854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":55090854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.052,"candidate_seconds":0.0308,"speedup":1.6875,"speedup_median":1.6905,"runs":15},"code":{"before":"void *w2(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n","after":"void *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n"}}]},"warnings":[]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/opt/threads_walk.c (2026-10-24 14:52)\n * Mapping strategy: optimized (exact-dp), policy: pack\n * Predicted contention of this mapping: 50.0\n *   core 0 (CPU 0 4): T0 w1 + T1 w2\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#include <pthread.h>\n#define N 1800\n#include <sched.h>\n\n/* ---- HT-Compass: compile-time thread-to-CPU map ---- */\n#define HT_NUM_THREADS 2\nstatic const int __ht_cpu_map[HT_NUM_THREADS] = { 0, 4 };\n\nstatic int __ht_create(pthread_t *t, void *(*fn)(void *), void *arg, int idx)\n{\n    /* Pin the new thread via its attribute so it never runs on another CPU. */\n    if (idx >= 0 && idx < HT_NUM_THREADS && __ht_cpu_map[idx] >= 0 &&\n        __ht_cpu_map[idx] < CPU_SETSIZE) {\n        pthread_attr_t attr;\n        cpu_set_t set;\n        int rc = -1;\n        CPU_ZERO(&set);\n        CPU_SET(__ht_cpu_map[idx], &set);\n        pthread_attr_init(&attr);\n        if (pthread_attr_setaffinity_np(&attr, sizeof(set), &set) == 0)\n            rc = pthread_create(t, &attr, fn, arg);\n        pthread_attr_destroy(&attr);\n        if (rc == 0) return 0;\n    }\n    return pthread_create(t, NULL, fn, arg);   /* CPU absent: run unpinned */\n}\n\n/* ---- forward declarations ---- */\nvoid *w1(void *arg);\nvoid *w2(void *arg);\n\n/* ---- program ---- */\ndouble a1[1800][1800];\ndouble b1[1800][1800];\ndouble a2[1800][1800];\ndouble b2[1800][1800];\npthread_t t[2];\n\nvoid *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n\nvoid *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n\nint main(void) {\n    __ht_create(&t[0], w1, NULL, 0);\n    __ht_create(&t[1], w2, NULL, 1);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    printf(\"%f %f\\n\", b1[2][3], b2[4][5]);\n    return 0;\n}\n","source":"/* threads_walk.c - each worker walks its own pair of matrices column by column.\n * The optimizer should interchange the loops inside the workers; the thread\n * mapping and pinning are then computed for the optimized program. */\n#include <stdio.h>\n#include <pthread.h>\n\n#define N 1800\n\ndouble a1[N][N];\ndouble b1[N][N];\ndouble a2[N][N];\ndouble b2[N][N];\npthread_t t[2];\n\nvoid *w1(void *arg)\n{\n    int i;\n    int j;\n    for (j = 0; j < N; j++) {\n        for (i = 0; i < N; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n\nvoid *w2(void *arg)\n{\n    int i;\n    int j;\n    for (j = 0; j < N; j++) {\n        for (i = 0; i < N; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n\nint main(void)\n{\n    pthread_create(&t[0], NULL, w1, NULL);\n    pthread_create(&t[1], NULL, w2, NULL);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    printf(\"%f %f\\n\", b1[2][3], b2[4][5]);\n    return 0;\n}\n"},"decisions":{"title":"Optimizer decisions on a matrix multiply (promotion.c)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/opt/promotion.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":0,"threads":0,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[],"contention_pairs":[],"high_contention_pairs":[],"mapping":{"strategy_emitted":"optimized","policy":"pack","naive_total":0.0,"optimized_total":0.0,"worst_total":0.0,"predicted_reduction_vs_naive_percent":0.0,"emitted":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]},"optimized":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]},"naive":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]}},"optimization":{"plan_only":false,"settings":{"fp_reassociation_allowed":false,"differential_test":true,"benchmark_selection":true,"min_speedup":1.03,"benchmark_runs":5,"random_data_seeds":2},"c_compiler_available":true,"baseline_runs_cleanly":true,"applied":1,"model_before":{"operations":963988702.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1796233552.0},"model_after":{"operations":1054710502.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":24473475.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1250498302.0},"end_to_end_timing":{"original_seconds":0.0706,"optimized_seconds":0.0563,"speedup":1.2539},"candidates":[{"round":1,"transformation":"interchange","function":"main","line":25,"description":"swap the loops over 'j' and 'k' (lines 25 and 26) in main","explanation":"The inner loop currently walks arrays with a large stride (90.9 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 104.0 million to 24.5 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":963988702.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1796233552.0},"after":{"operations":1054710502.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":24473475.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1250498302.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.073,"candidate_seconds":0.0584,"speedup":1.2503,"speedup_median":1.2747,"runs":15},"code":{"before":"int main(void) {\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 450; k++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n","after":"int main(void) {\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (k = 0; k < 450; k++) {\n            for (j = 0; j < 450 - 1; j++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n"}},{"round":1,"transformation":"fusion","function":"main","line":24,"description":"fuse the loops at lines 24 and 31 in main","explanation":"Both loops cover the same range and use the same arrays. Fusing them lets each element be reused while it is still in cache (estimated memory lines 104.0 million to 104.0 million, operations 964.0 million to 964.0 million).","safety":"exact","status":"rejected","reason":"measured 0.97x best-of-15 (median 1.00x, 0.071 s to 0.073 s); 1.03x is needed","legality_evidence":"identical iteration space; checked 0 array pair(s) across the two loops, every shared element is reached by loop 1 no later than by loop 2","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":963988702.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1796233552.0},"after":{"operations":963987352.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1796232202.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0709,"candidate_seconds":0.0729,"speedup":0.9724,"speedup_median":0.9976,"runs":15}},{"round":1,"transformation":"promotion","function":"main","line":26,"description":"keep c[i][j] in a register across the loop over 'k' (line 26) in main","explanation":"The element is the same on every iteration, so it can live in a register: loads drop from 311.6 million to 220.8 million and stores from 104.3 million to 13.5 million.","safety":"exact","status":"rejected","reason":"measured 1.01x best-of-15 (median 1.00x, 0.069 s to 0.068 s); 1.03x is needed","legality_evidence":"c[i][j] is the same element on every iteration; no other element of 'c' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 450 time(s) so the element is certainly accessed","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":963988702.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1796233552.0},"after":{"operations":782547802.0,"loads":220840652.0,"stores":13538250.0,"estimated_dram_lines":104030606.25,"strided_accesses":90922500.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1614792652.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0687,"candidate_seconds":0.0683,"speedup":1.0055,"speedup_median":0.9986,"runs":15}},{"round":1,"transformation":"interchange","function":"main","line":18,"description":"swap the loops over 'i' and 'j' (lines 18 and 19) in main","safety":"exact","status":"skipped","reason":"legal, but the locality analysis expects no gain","legality_evidence":"checked 2 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false},{"round":1,"transformation":"interchange","function":"main","line":24,"description":"swap the loops over 'i' and 'j' (lines 24 and 25) in main","safety":"exact","status":"skipped","reason":"legal, but the locality analysis expects no gain","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0,2)","suggested_by_advice":false},{"round":1,"transformation":"interchange","function":"main","line":31,"description":"swap the loops over 'i' and 'j' (lines 31 and 32) in main","safety":"exact","status":"skipped","reason":"legal, but the locality analysis expects no gain","legality_evidence":"checked 2 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0,2)","suggested_by_advice":false},{"round":1,"transformation":"interchange","function":"main","line":32,"description":"swap the loops over 'j' and 'k' (lines 32 and 33) in main","explanation":"Swapping the loops can make the innermost loop walk memory sequentially.","safety":"refused","status":"rejected","reason":"not provably safe: dependence between d[i][(j+1)] and d[i][j] would be reversed","suggested_by_advice":false},{"round":1,"transformation":"fusion","function":"main","line":18,"description":"fuse the loops at lines 18 and 24 in main","explanation":"Both loops cover the same range and use the same arrays; fusing them reuses data while it is still in cache and removes one loop's overhead.","safety":"refused","status":"rejected","reason":"not provably safe: cannot prove a[i][j] (loop 1) and a[i][k] (loop 2) independent","suggested_by_advice":false},{"round":2,"transformation":"promotion","function":"main","line":26,"description":"keep a[i][k] in a register across the loop over 'j' (line 26) in main","explanation":"The element is the same on every iteration, so it can live in a register: loads drop from 311.6 million to 220.8 million and stores from 104.3 million to 104.3 million.","safety":"exact","status":"rejected","reason":"measured 1.01x best-of-15 (median 1.02x, 0.056 s to 0.056 s); 1.03x is needed","legality_evidence":"a[i][k] is the same element on every iteration; no other element of 'a' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 449 time(s) so the element is certainly accessed","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":1054710502.0,"loads":311561102.0,"stores":104258700.0,"estimated_dram_lines":24473475.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1250498302.0},"after":{"operations":963990502.0,"loads":220841102.0,"stores":104258700.0,"estimated_dram_lines":24473475.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":1159778302.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0564,"candidate_seconds":0.0558,"speedup":1.0092,"speedup_median":1.0222,"runs":15}}]},"warnings":["no pthread_create call found: nothing to analyse"]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/opt/promotion.c (2026-10-24 14:52)\n * Mapping strategy: optimized (none), policy: pack\n * Predicted contention of this mapping: 0.0\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#define N 450\n#include <pthread.h>\n#include <sched.h>\n\n/* HT-Compass: no pthread_create found - program emitted unchanged. */\n\n/* ---- forward declarations ---- */\n\n/* ---- program ---- */\ndouble a[450][450];\ndouble b[450][450];\ndouble c[450][450];\ndouble d[450][450];\n\nint main(void) {\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (k = 0; k < 450; k++) {\n            for (j = 0; j < 450 - 1; j++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < 450; i++) {\n        for (j = 0; j < 450 - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n","source":"/* promotion.c - classic matrix multiply: c[i][j] is the same element for every k.\n * Keeping it in a register removes a load and a store from the inner loop.\n * The second loop nest touches c[i][j+1] as well, so promotion must be refused there. */\n#include <stdio.h>\n\n#define N 450\n\ndouble a[N][N];\ndouble b[N][N];\ndouble c[N][N];\ndouble d[N][N];\n\nint main(void)\n{\n    int i;\n    int j;\n    int k;\n    for (i = 0; i < N; i++) {\n        for (j = 0; j < N; j++) {\n            a[i][j] = (i + j) * 0.01;\n            b[i][j] = (i - j) * 0.02;\n        }\n    }\n    for (i = 0; i < N; i++) {\n        for (j = 0; j < N - 1; j++) {\n            for (k = 0; k < N; k++) {\n                c[i][j] += a[i][k] * b[k][j];\n            }\n        }\n    }\n    for (i = 0; i < N; i++) {\n        for (j = 0; j < N - 1; j++) {\n            for (k = 0; k < 64; k++) {\n                d[i][j] += d[i][j + 1] * 0.5 + a[i][k];\n            }\n        }\n    }\n    printf(\"%f %f\\n\", c[3][4], d[3][4]);\n    return 0;\n}\n"},"ai_real":{"title":"Real local-model run (tiny 270M model: its answer is unusable, and the pipeline copes)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/opt/threads_walk.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":2,"threads":2,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[{"id":0,"name":"w1","worker":"w1","create_line":41,"handle":"t","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":0,"assigned_cpu":0,"profile":{"int_ops":6483600.0,"fp_ops":3240000.0,"heavy_ops":0.0,"loads":3240000.0,"stores":3240000.0,"branches":811800.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":17015400.0,"estimated_dram_lines":810000.0,"working_set_bytes":51840000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":0.0,"strided":6480000.0,"irregular":0.0},"normalized_demand":{"integer":0.381,"floating_point":0.1904,"heavy_math":0.0,"load_store":0.3808,"memory_bandwidth":0.7617}},"arrays":[{"name":"a1","scope":"global","bytes":25920000,"reads":3240000.0,"writes":0.0,"footprint_bytes":25920000.0},{"name":"b1","scope":"global","bytes":25920000,"reads":0.0,"writes":3240000.0,"footprint_bytes":25920000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":1,"name":"w2","worker":"w2","create_line":42,"handle":"t","created_in":"main","class":"memory-bound","start_event":1,"end_event":2,"assigned_core":0,"assigned_cpu":4,"profile":{"int_ops":6483600.0,"fp_ops":6480000.0,"heavy_ops":0.0,"loads":3240000.0,"stores":3240000.0,"branches":3241800.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":22685400.0,"estimated_dram_lines":810000.0,"working_set_bytes":51840000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":6480000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.2858,"floating_point":0.2856,"heavy_math":0.0,"load_store":0.2856,"memory_bandwidth":0.5713}},"arrays":[{"name":"a2","scope":"global","bytes":25920000,"reads":3240000.0,"writes":0.0,"footprint_bytes":25920000.0},{"name":"b2","scope":"global","bytes":25920000,"reads":0.0,"writes":3240000.0,"footprint_bytes":25920000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]}],"contention_pairs":[{"a":0,"b":1,"score":47.6218,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.2667,"load_store":0.2856,"cache":1.0,"memory_bandwidth":0.5713,"overlap_factor":0.875,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 98.9 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units"]}],"high_contention_pairs":[[0,1]],"mapping":{"strategy_emitted":"optimized","policy":"pack","naive_total":47.6218,"optimized_total":47.6218,"worst_total":47.6218,"predicted_reduction_vs_naive_percent":0.0,"emitted":{"algorithm":"exact-dp","predicted_total_contention":47.6218,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":47.6218,"advice":"high contention: prefer separate cores if available"}]},"optimized":{"algorithm":"exact-dp","predicted_total_contention":47.6218,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":47.6218,"advice":"high contention: prefer separate cores if available"}]},"naive":{"algorithm":"creation-order","predicted_total_contention":47.6218,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":47.6218,"advice":"high contention: prefer separate cores if available"}]}},"optimization":{"plan_only":false,"settings":{"fp_reassociation_allowed":false,"differential_test":true,"benchmark_selection":false,"min_speedup":1.03,"benchmark_runs":5,"random_data_seeds":2},"ai":{"mode":"local-model","available":true,"failed":false,"model":"gemma3-270m-base-local:latest","endpoint":"127.0.0.1:11434","ollama_version":"0.40.10","installed_models":["gemma3-270m-base-local:latest"],"request":{"prompt_characters":4215},"response":{"characters":15003,"seconds":65.531,"prompt_tokens":1396,"generated_tokens":1536,"cut_off_at_token_limit":true,"excerpt":"{\n    \"proposals\": [\n        {\n            \"transformation\": \"region\",\n            \"region\": \"L1\",\n            \"parameters\": {\n                \"transformation\": \"region\",\n                \"region\": \"L2\",\n                \"parameters\": {\n                    \"transformation\": \"region\",\n                    \"region\": \"L3\",\n                    \"parameters\": {\n                        \"transformation\": \"region\",\n                        \"region\": \"L4\",\n                        \"parameters\": {\n                            \"transformation\": \"region\",\n                            \"region\": \"L5\",\n                            \"parameters\": {\n                                \"transformation\": \"region\",\n                                \"region\": \"L6\",\n                                \"parameters\": {\n                                    \"transformation\": \"region\",\n                                    \"region\": \"L7\",\n                                    \"parameters\": {\n                                        \"transformation\": \"region\",\n                                        \"region\": \"L8\",\n                                        \"parameters\": {\n                                            \"transformation\": \"region\",\n                                            \"region\": \"L9\",\n                                            \"parameters\": {\n                                                \"transformation\": \"region\",\n                                                \"region\": \"L10\",\n                                                \"parameters\": {\n                                                    \"transformation\": \"region\",\n                                                    \"region\": \"L11\",\n                                                    \"parameters\": {\n                                                        \"transformation\": \"region\",\n                                                        \"region\": \"L12\",\n                                                        \"parameters\": {\n                                                            \"transfor"},"proposals":{"total":0,"supported":0,"matched_a_site":0,"unsupported":0,"invalid":0,"duplicate":0},"validation_notes":["the model's reply could not be used: the JSON in the reply is incomplete (cut off?) (the reply was cut off at the token limit)"]},"c_compiler_available":true,"baseline_runs_cleanly":true,"applied":3,"model_before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"model_after":{"operations":39700854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":47.6218,"model_cost":52660854.0},"candidates":[{"round":1,"transformation":"interchange","function":"w1","line":19,"description":"swap the loops over 'j' and 'i' (lines 19 and 20) in w1","region":"w1/L1","source":"compiler","explanation":"The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":52.6581,"model_cost":100450854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"code":{"before":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n","after":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n"}},{"round":1,"transformation":"interchange","function":"w2","line":31,"description":"swap the loops over 'j' and 'i' (lines 31 and 32) in w2","region":"w2/L1","source":"compiler","explanation":"The inner loop currently walks arrays with a large stride (13.0 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 13.0 million to 7.3 million).","safety":"exact","status":"passed","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":100450854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"}},{"round":1,"transformation":"unrolling","function":"w1","line":20,"description":"unroll the loop over 'i' (line 20, 1800 iterations) in w1","region":"w1/L2","source":"compiler","explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.","safety":"exact","status":"passed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'i' is not modified in the body","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":39700854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":58.8758,"model_cost":143380854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"}},{"round":1,"transformation":"unrolling","function":"w2","line":32,"description":"unroll the loop over 'i' (line 32, 1800 iterations) in w2","region":"w2/L2","source":"compiler","explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.","safety":"exact","status":"rejected","reason":"the cost model predicts too small a gain (cost 145810854 to 143380854, contention 61.9 to 66.3)","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'i' is not modified in the body","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":61.9491,"model_cost":145810854.0},"after":{"operations":39700854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":12960000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":66.2863,"model_cost":143380854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"}},{"round":2,"transformation":"interchange","function":"w2","line":31,"description":"swap the loops over 'j' and 'i' (lines 31 and 32) in w2","region":"w2/L1","source":"compiler","explanation":"The inner loop currently walks arrays with a large stride (6.5 million strided accesses), so almost every access starts a new cache line. After the swap those accesses are sequential and each fetched line is fully used (estimated memory lines 7.3 million to 1.6 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":52.6581,"model_cost":100450854.0},"after":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":55090854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"code":{"before":"void *w2(void *arg) {\n    int i;\n    int j;\n    for (j = 0; j < 1800; j++) {\n        for (i = 0; i < 1800; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n","after":"void *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n"}},{"round":2,"transformation":"unrolling","function":"w1","line":20,"description":"unroll the loop over 'j' (line 20, 1800 iterations) in w1","region":"w1/L2","source":"compiler","explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.","safety":"exact","status":"passed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'j' is not modified in the body","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":52.6581,"model_cost":100450854.0},"after":{"operations":39700854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":7290000.0,"strided_accesses":12960000.0,"irregular_accesses":0.0,"predicted_contention":52.6192,"model_cost":98020854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"}},{"round":3,"transformation":"unrolling","function":"w1","line":20,"description":"unroll the loop over 'j' (line 20, 1800 iterations) in w1","region":"w1/L2","source":"compiler","explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 42.1 million to 39.7 million). The iterations still run in exactly the original order.","safety":"exact","status":"applied","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (1800) is a compile-time constant and 'j' is not modified in the body","suggested_by_advice":false,"decided_by":"model","model":{"before":{"operations":42130854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":50.0064,"model_cost":55090854.0},"after":{"operations":39700854.0,"loads":6480004.0,"stores":6480000.0,"estimated_dram_lines":1620000.0,"strided_accesses":6480000.0,"irregular_accesses":0.0,"predicted_contention":47.6218,"model_cost":52660854.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"code":{"before":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n","after":"void *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j += 4) {\n            {\n                b1[i][j] = a1[i][j] + 1.0;\n            }\n            {\n                b1[i][j + 1] = a1[i][j + 1] + 1.0;\n            }\n            {\n                b1[i][j + 2] = a1[i][j + 2] + 1.0;\n            }\n            {\n                b1[i][j + 3] = a1[i][j + 3] + 1.0;\n            }\n        }\n    }\n    return NULL;\n}\n"}}]},"warnings":[]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/opt/threads_walk.c (2026-10-24 18:36)\n * Mapping strategy: optimized (exact-dp), policy: pack\n * Predicted contention of this mapping: 47.6\n *   core 0 (CPU 0 4): T0 w1 + T1 w2\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#include <pthread.h>\n#define N 1800\n#include <sched.h>\n\n/* ---- HT-Compass: compile-time thread-to-CPU map ---- */\n#define HT_NUM_THREADS 2\nstatic const int __ht_cpu_map[HT_NUM_THREADS] = { 0, 4 };\n\nstatic int __ht_create(pthread_t *t, void *(*fn)(void *), void *arg, int idx)\n{\n    /* Pin the new thread via its attribute so it never runs on another CPU. */\n    if (idx >= 0 && idx < HT_NUM_THREADS && __ht_cpu_map[idx] >= 0 &&\n        __ht_cpu_map[idx] < CPU_SETSIZE) {\n        pthread_attr_t attr;\n        cpu_set_t set;\n        int rc = -1;\n        CPU_ZERO(&set);\n        CPU_SET(__ht_cpu_map[idx], &set);\n        pthread_attr_init(&attr);\n        if (pthread_attr_setaffinity_np(&attr, sizeof(set), &set) == 0)\n            rc = pthread_create(t, &attr, fn, arg);\n        pthread_attr_destroy(&attr);\n        if (rc == 0) return 0;\n    }\n    return pthread_create(t, NULL, fn, arg);   /* CPU absent: run unpinned */\n}\n\n/* ---- forward declarations ---- */\nvoid *w1(void *arg);\nvoid *w2(void *arg);\n\n/* ---- program ---- */\ndouble a1[1800][1800];\ndouble b1[1800][1800];\ndouble a2[1800][1800];\ndouble b2[1800][1800];\npthread_t t[2];\n\nvoid *w1(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j += 4) {\n            {\n                b1[i][j] = a1[i][j] + 1.0;\n            }\n            {\n                b1[i][j + 1] = a1[i][j + 1] + 1.0;\n            }\n            {\n                b1[i][j + 2] = a1[i][j + 2] + 1.0;\n            }\n            {\n                b1[i][j + 3] = a1[i][j + 3] + 1.0;\n            }\n        }\n    }\n    return NULL;\n}\n\nvoid *w2(void *arg) {\n    int i;\n    int j;\n    for (i = 0; i < 1800; i++) {\n        for (j = 0; j < 1800; j++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n\nint main(void) {\n    __ht_create(&t[0], w1, NULL, 0);\n    __ht_create(&t[1], w2, NULL, 1);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    printf(\"%f %f\\n\", b1[2][3], b2[4][5]);\n    return 0;\n}\n","source":"/* threads_walk.c - each worker walks its own pair of matrices column by column.\n * The optimizer should interchange the loops inside the workers; the thread\n * mapping and pinning are then computed for the optimized program. */\n#include <stdio.h>\n#include <pthread.h>\n\n#define N 1800\n\ndouble a1[N][N];\ndouble b1[N][N];\ndouble a2[N][N];\ndouble b2[N][N];\npthread_t t[2];\n\nvoid *w1(void *arg)\n{\n    int i;\n    int j;\n    for (j = 0; j < N; j++) {\n        for (i = 0; i < N; i++) {\n            b1[i][j] = a1[i][j] + 1.0;\n        }\n    }\n    return NULL;\n}\n\nvoid *w2(void *arg)\n{\n    int i;\n    int j;\n    for (j = 0; j < N; j++) {\n        for (i = 0; i < N; i++) {\n            b2[i][j] = a2[i][j] * 2.0 + 3.0;\n        }\n    }\n    return NULL;\n}\n\nint main(void)\n{\n    pthread_create(&t[0], NULL, w1, NULL);\n    pthread_create(&t[1], NULL, w2, NULL);\n    pthread_join(t[0], NULL);\n    pthread_join(t[1], NULL);\n    printf(\"%f %f\\n\", b1[2][3], b2[4][5]);\n    return 0;\n}\n"},"ai_demo":{"title":"AI proposals through every check (TEST REPLY from a file, not real inference)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/opt/unroll_licm.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":0,"threads":0,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[],"contention_pairs":[],"high_contention_pairs":[],"mapping":{"strategy_emitted":"optimized","policy":"pack","naive_total":0.0,"optimized_total":0.0,"worst_total":0.0,"predicted_reduction_vs_naive_percent":0.0,"emitted":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]},"optimized":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]},"naive":{"algorithm":"none","predicted_total_contention":0.0,"cores":[]}},"optimization":{"plan_only":false,"settings":{"fp_reassociation_allowed":false,"differential_test":true,"benchmark_selection":true,"min_speedup":1.03,"benchmark_runs":5,"random_data_seeds":2},"ai":{"mode":"reply-file (test hook, not real inference)","available":true,"failed":false,"model":"(reply file)","endpoint":"127.0.0.1:11434","installed_models":[],"request":{"prompt_characters":3444},"response":{"characters":792,"seconds":0.0,"prompt_tokens":0,"generated_tokens":0,"cut_off_at_token_limit":false,"excerpt":"{\"proposals\":[\n {\"transformation\":\"licm\",\"region\":\"main/L3\",\"explanation\":\"alpha*beta+sqrt(alpha) never changes inside the loop.\",\"expected_benefit\":\"removes a sqrt per iteration\",\"preconditions\":[\"alpha and beta not modified\"],\"risks\":[\"none\"],\"priority\":1},\n {\"transformation\":\"unrolling\",\"region\":\"main/L3\",\"parameters\":{\"factor\":8},\"explanation\":\"long streaming loop\",\"expected_benefit\":\"less loop overhead\",\"preconditions\":[\"constant trip count\"],\"risks\":[\"code size\"],\"priority\":2},\n {\"transformation\":\"strength_reduction\",\"region\":\"main/L3\",\"explanation\":\"replace multiplications\",\"expected_benefit\":\"cheaper operations\",\"preconditions\":[],\"risks\":[],\"priority\":3},\n {\"transformation\":\"loop_interchange\",\"region\":\"main/L9\",\"explanation\":\"a region that does not exist\",\"priority\":4}\n]}\n"},"proposals":{"total":4,"supported":2,"matched_a_site":2,"unsupported":1,"invalid":1,"duplicate":0},"validation_notes":[]},"c_compiler_available":true,"baseline_runs_cleanly":true,"applied":2,"model_before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"model_after":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0},"end_to_end_timing":{"original_seconds":0.0959,"optimized_seconds":0.0401,"speedup":2.3904},"candidates":[{"round":1,"transformation":"strength_reduction","function":"main","line":23,"description":"strength_reduction proposed for main/L3","region":"main/L3","source":"model","model_proposal":{"rank":3,"explanation":"replace multiplications","expected_benefit":"cheaper operations","preconditions":"","risks":""},"safety":"-","status":"unsupported","reason":"proposed, but this compiler has no implementation of 'strength_reduction'","suggested_by_advice":true},{"round":1,"transformation":"interchange","function":"","line":0,"description":"interchange proposed for main/L9","region":"main/L9","source":"model","model_proposal":{"rank":4,"explanation":"a region that does not exist","expected_benefit":"","preconditions":"","risks":""},"safety":"-","status":"invalid","reason":"unknown region 'main/L9' (not in the REGIONS list)","suggested_by_advice":true},{"round":1,"transformation":"licm","function":"main","line":23,"description":"move 1 loop-invariant computation(s) out of the loop over 'i' (line 23) in main","region":"main/L3","source":"model","model_proposal":{"rank":1,"explanation":"alpha*beta+sqrt(alpha) never changes inside the loop.","expected_benefit":"removes a sqrt per iteration","preconditions":"alpha and beta not modified","risks":"none"},"explanation":"Some computations in the loop produce the same value every iteration. Computing them once before the loop saves repeating them (estimated operations 504.0 million to 216.0 million). Note that gcc -O2 often does this already.","safety":"exact","status":"passed","legality_evidence":"1 expression(s), e.g. ((alpha*beta)+sqrt(alpha,)), use only constants and variables the loop never changes, call only math functions and cannot trap (no division by a variable); each is computed with the same operations on the same values, so the result is bit-identical","suggested_by_advice":true,"decided_by":"benchmark","model":{"before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"after":{"operations":216000387.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":294000465.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0887,"candidate_seconds":0.0685,"speedup":1.295,"speedup_median":1.3124,"runs":15}},{"round":1,"transformation":"unrolling","function":"main","line":23,"description":"unroll the loop over 'i' (line 23, 3000003 iterations) in main","region":"main/L3","source":"model","model_proposal":{"rank":2,"explanation":"long streaming loop","expected_benefit":"less loop overhead","preconditions":"constant trip count","risks":"code size"},"explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 504.0 million to 504.0 million). The iterations still run in exactly the original order.","safety":"exact","status":"passed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body","suggested_by_advice":true,"decided_by":"benchmark","model":{"before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"after":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":72000000.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0879,"candidate_seconds":0.0627,"speedup":1.402,"speedup_median":1.349,"runs":15}},{"round":1,"transformation":"interchange","function":"main","line":22,"description":"swap the loops over 'r' and 'i' (lines 22 and 23) in main","region":"main/L2","source":"compiler","explanation":"Swapping the two loops changes the order in which memory is visited (estimated memory lines 9.8 million to 1.9 million).","safety":"exact","status":"passed","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"after":{"operations":513000564.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":528000579.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0967,"candidate_seconds":0.0797,"speedup":1.2136,"speedup_median":1.2135,"runs":9}},{"round":1,"transformation":"unrolling","function":"main","line":18,"description":"unroll the loop over 'i' (line 18, 3000003 iterations) in main","region":"main/L1","source":"compiler","explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 504.0 million to 506.3 million). The iterations still run in exactly the original order.","safety":"exact","status":"rejected","reason":"measured 1.00x best-of-9 (median 0.97x, 0.087 s to 0.086 s); 1.03x is needed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"after":{"operations":506250579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":6000000.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":584250657.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0867,"candidate_seconds":0.0864,"speedup":1.0035,"speedup_median":0.9744,"runs":9}},{"round":1,"transformation":"licm","function":"main","line":22,"description":"move 1 loop-invariant computation(s) out of the loop over 'r' (line 22) in main","region":"main/L2","source":"compiler","explanation":"Some computations in the loop produce the same value every iteration. Computing them once before the loop saves repeating them (estimated operations 504.0 million to 216.0 million). Note that gcc -O2 often does this already.","safety":"exact","status":"applied","legality_evidence":"1 expression(s), e.g. ((alpha*beta)+sqrt(alpha,)), use only constants and variables the loop never changes, call only math functions and cannot trap (no division by a variable); each is computed with the same operations on the same values, so the result is bit-identical","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":504000579.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":582000657.0},"after":{"operations":216000303.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":294000381.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0844,"candidate_seconds":0.0612,"speedup":1.3792,"speedup_median":1.3358,"runs":15},"code":{"before":"int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * (alpha * beta + sqrt(alpha)) + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n","after":"int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n"}},{"round":2,"transformation":"unrolling","function":"main","line":23,"description":"unroll the loop over 'i' (line 23, 3000003 iterations) in main","region":"main/L3","source":"model","model_proposal":{"rank":2,"explanation":"long streaming loop","expected_benefit":"less loop overhead","preconditions":"constant trip count","risks":"code size"},"explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 216.0 million to 216.0 million). The iterations still run in exactly the original order.","safety":"exact","status":"passed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (3000003) is a compile-time constant and 'i' is not modified in the body","suggested_by_advice":true,"decided_by":"benchmark","model":{"before":{"operations":216000303.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":294000381.0},"after":{"operations":216000303.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":72000000.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":294000381.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0635,"candidate_seconds":0.057,"speedup":1.1134,"speedup_median":1.0556,"runs":15}},{"round":2,"transformation":"interchange","function":"main","line":22,"description":"swap the loops over 'r' and 'i' (lines 22 and 23) in main","region":"main/L2","source":"compiler","explanation":"Swapping the two loops changes the order in which memory is visited (estimated memory lines 9.8 million to 1.9 million).","safety":"exact","status":"applied","legality_evidence":"checked 1 conflicting reference pair(s) and 0 scalar(s); every dependence stays lexicographically positive under loop order (1,0)","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":216000303.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":9750009.75,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":294000381.0},"after":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0677,"candidate_seconds":0.036,"speedup":1.8808,"speedup_median":1.8918,"runs":15},"code":{"before":"int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < 3000003; i++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n","after":"int main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (i = 0; i < 3000003; i++) {\n        for (r = 0; r < 8; r++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n"}},{"round":3,"transformation":"unrolling","function":"main","line":23,"description":"unroll the loop over 'r' (line 23, 8 iterations) in main","region":"main/L3","source":"model","model_proposal":{"rank":2,"explanation":"long streaming loop","expected_benefit":"less loop overhead","preconditions":"constant trip count","risks":"code size"},"explanation":"Running several iterations per trip removes loop-control work (compare and branch) and gives the processor longer straight-line code to schedule (estimated operations 225.0 million to 171.0 million). The iterations still run in exactly the original order.","safety":"exact","status":"rejected","reason":"measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed","legality_evidence":"unrolling replays the iterations in exactly the original order, so no dependence can change; the trip count (8) is a compile-time constant and 'r' is not modified in the body","suggested_by_advice":true,"decided_by":"benchmark","model":{"before":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0},"after":{"operations":171000234.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":186000249.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.04,"candidate_seconds":0.0401,"speedup":0.9973,"speedup_median":0.9998,"runs":15}},{"round":3,"transformation":"promotion","function":"main","line":23,"description":"keep a[i] in a register across the loop over 'r' (line 23) in main","region":"main/L3","source":"compiler","explanation":"The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 27.0 million and stores from 30.0 million to 30.0 million.","safety":"exact","status":"rejected","reason":"measured 1.00x best-of-15 (median 0.96x, 0.040 s to 0.040 s); 1.03x is needed","legality_evidence":"a[i] is the same element on every iteration; no other element of 'a' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0},"after":{"operations":204000267.0,"loads":27000028.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":219000282.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0399,"candidate_seconds":0.0398,"speedup":1.0009,"speedup_median":0.9558,"runs":15}},{"round":3,"transformation":"promotion","function":"main","line":23,"description":"keep b[i] in a register across the loop over 'r' (line 23) in main","region":"main/L3","source":"compiler","explanation":"The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 27.0 million and stores from 30.0 million to 30.0 million.","safety":"exact","status":"rejected","reason":"measured 1.00x best-of-15 (median 1.00x, 0.040 s to 0.040 s); 1.03x is needed","legality_evidence":"b[i] is the same element on every iteration; no other element of 'b' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0},"after":{"operations":204000267.0,"loads":27000028.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":219000282.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0401,"candidate_seconds":0.04,"speedup":1.0043,"speedup_median":1.0002,"runs":15}},{"round":3,"transformation":"promotion","function":"main","line":23,"description":"keep c[i] in a register across the loop over 'r' (line 23) in main","region":"main/L3","source":"compiler","explanation":"The element is the same on every iteration, so it can live in a register: loads drop from 48.0 million to 51.0 million and stores from 30.0 million to 9.0 million.","safety":"exact","status":"rejected","reason":"measured 1.01x best-of-15 (median 0.99x, 0.040 s to 0.040 s); 1.03x is needed","legality_evidence":"c[i] is the same element on every iteration; no other element of 'c' is touched in the loop, there are no calls (other than math), the body is straight-line, and the loop runs 8 time(s) so the element is certainly accessed","suggested_by_advice":false,"decided_by":"benchmark","model":{"before":{"operations":225000288.0,"loads":48000049.0,"stores":30000030.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":240000303.0},"after":{"operations":207000270.0,"loads":51000052.0,"stores":9000009.0,"estimated_dram_lines":1875001.875,"strided_accesses":0.0,"irregular_accesses":0.0,"predicted_contention":0.0,"model_cost":222000285.0}},"differential_test":{"passed":true,"runs":3,"agreed":3,"note":"3 run(s) agreed (memory and output identical)"},"benchmark":{"baseline_seconds":0.0398,"candidate_seconds":0.0396,"speedup":1.0051,"speedup_median":0.9873,"runs":15}}]},"warnings":["no pthread_create call found: nothing to analyse"]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/opt/unroll_licm.c (2026-10-24 18:37)\n * Mapping strategy: optimized (none), policy: pack\n * Predicted contention of this mapping: 0.0\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#include <math.h>\n#define N 3000003\n#include <pthread.h>\n#include <sched.h>\n\n/* HT-Compass: no pthread_create found - program emitted unchanged. */\n\n/* ---- forward declarations ---- */\n\n/* ---- program ---- */\ndouble a[3000003];\ndouble b[3000003];\ndouble c[3000003];\ndouble alpha = 1.5;\ndouble beta = 0.25;\n\nint main(void) {\n    int i;\n    int r;\n    for (i = 0; i < 3000003; i++) {\n        a[i] = i * 0.5;\n        b[i] = (3000003 - i) * 0.25;\n    }\n    double __ht_inv_22_0 = alpha * beta + sqrt(alpha);\n    for (i = 0; i < 3000003; i++) {\n        for (r = 0; r < 8; r++) {\n            c[i] = a[i] * __ht_inv_22_0 + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n","source":"/* unroll_licm.c - the multiplier alpha*beta + sqrt(alpha) is the same on every iteration\n * (loop-invariant code motion), and the inner loop is long enough to unroll. */\n#include <stdio.h>\n#include <math.h>\n\n#define N 3000003\n\ndouble a[N];\ndouble b[N];\ndouble c[N];\ndouble alpha = 1.5;\ndouble beta = 0.25;\n\nint main(void)\n{\n    int i;\n    int r;\n    for (i = 0; i < N; i++) {\n        a[i] = i * 0.5;\n        b[i] = (N - i) * 0.25;\n    }\n    for (r = 0; r < 8; r++) {\n        for (i = 0; i < N; i++) {\n            c[i] = a[i] * (alpha * beta + sqrt(alpha)) + b[i];\n        }\n    }\n    printf(\"%f\\n\", c[7]);\n    return 0;\n}\n"},"loops":{"title":"Loop-created threads, spread policy (loop_threads.c)","report":{"tool":"HT-Compass","version":"1.0.0","input_file":"tests/loop_threads.c","topology":{"source":"user","smt_detected":true,"cores":4,"logical_cpus":8,"l1d_bytes":49152,"l2_bytes":2097152,"cache_source":"sysfs","core_siblings":[[0,4],[1,5],[2,6],[3,7]]},"program":{"thread_sites":2,"threads":6,"assumed_trip_counts":0},"model":{"weights":{"execution_units":0.3,"load_store":0.15,"cache":0.25,"memory_bandwidth":0.3},"severity_thresholds":{"high":35.0,"medium":15.0},"default_trip_count":64,"bandwidth_reference_bytes_per_op":4.0},"threads":[{"id":0,"name":"streamer#0","worker":"streamer","create_line":45,"handle":"streamers","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":0,"assigned_cpu":0,"profile":{"int_ops":1000000.0,"fp_ops":1000000.0,"heavy_ops":0.0,"loads":1000000.0,"stores":500000.0,"branches":500000.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":4000000.0,"estimated_dram_lines":125000.0,"working_set_bytes":8000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":1500000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.5}},"arrays":[{"name":"src","scope":"global","bytes":4000000,"reads":500000.0,"writes":0.0,"footprint_bytes":4000000.0},{"name":"dst","scope":"global","bytes":4000000,"reads":500000.0,"writes":500000.0,"footprint_bytes":4000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":1,"name":"streamer#1","worker":"streamer","create_line":45,"handle":"streamers","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":1,"assigned_cpu":1,"profile":{"int_ops":1000000.0,"fp_ops":1000000.0,"heavy_ops":0.0,"loads":1000000.0,"stores":500000.0,"branches":500000.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":4000000.0,"estimated_dram_lines":125000.0,"working_set_bytes":8000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":1500000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.5}},"arrays":[{"name":"src","scope":"global","bytes":4000000,"reads":500000.0,"writes":0.0,"footprint_bytes":4000000.0},{"name":"dst","scope":"global","bytes":4000000,"reads":500000.0,"writes":500000.0,"footprint_bytes":4000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":2,"name":"streamer#2","worker":"streamer","create_line":45,"handle":"streamers","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":2,"assigned_cpu":2,"profile":{"int_ops":1000000.0,"fp_ops":1000000.0,"heavy_ops":0.0,"loads":1000000.0,"stores":500000.0,"branches":500000.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":4000000.0,"estimated_dram_lines":125000.0,"working_set_bytes":8000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":1500000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.5}},"arrays":[{"name":"src","scope":"global","bytes":4000000,"reads":500000.0,"writes":0.0,"footprint_bytes":4000000.0},{"name":"dst","scope":"global","bytes":4000000,"reads":500000.0,"writes":500000.0,"footprint_bytes":4000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":3,"name":"streamer#3","worker":"streamer","create_line":45,"handle":"streamers","created_in":"main","class":"memory-bound","start_event":0,"end_event":2,"assigned_core":3,"assigned_cpu":3,"profile":{"int_ops":1000000.0,"fp_ops":1000000.0,"heavy_ops":0.0,"loads":1000000.0,"stores":500000.0,"branches":500000.0,"io_ops":0.0,"lock_ops":0.0,"total_ops":4000000.0,"estimated_dram_lines":125000.0,"working_set_bytes":8000000.0,"assumed_trip_counts":0,"access_patterns":{"sequential":1500000.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.25,"floating_point":0.25,"heavy_math":0.0,"load_store":0.375,"memory_bandwidth":0.5}},"arrays":[{"name":"src","scope":"global","bytes":4000000,"reads":500000.0,"writes":0.0,"footprint_bytes":4000000.0},{"name":"dst","scope":"global","bytes":4000000,"reads":500000.0,"writes":500000.0,"footprint_bytes":4000000.0}],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":4,"name":"cruncher#0","worker":"cruncher","create_line":48,"handle":"crunchers","created_in":"main","class":"compute-bound (div/sqrt/math)","start_event":1,"end_event":3,"assigned_core":0,"assigned_cpu":4,"profile":{"int_ops":3999998.0,"fp_ops":3999998.0,"heavy_ops":21999989.0,"loads":0.0,"stores":0.0,"branches":1999999.0,"io_ops":50.0,"lock_ops":0.0,"total_ops":32000034.0,"estimated_dram_lines":0.0,"working_set_bytes":0.0,"assumed_trip_counts":0,"access_patterns":{"sequential":0.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.125,"floating_point":0.125,"heavy_math":0.6875,"load_store":0.0,"memory_bandwidth":0.0}},"arrays":[],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]},{"id":5,"name":"cruncher#1","worker":"cruncher","create_line":48,"handle":"crunchers","created_in":"main","class":"compute-bound (div/sqrt/math)","start_event":1,"end_event":3,"assigned_core":1,"assigned_cpu":5,"profile":{"int_ops":3999998.0,"fp_ops":3999998.0,"heavy_ops":21999989.0,"loads":0.0,"stores":0.0,"branches":1999999.0,"io_ops":50.0,"lock_ops":0.0,"total_ops":32000034.0,"estimated_dram_lines":0.0,"working_set_bytes":0.0,"assumed_trip_counts":0,"access_patterns":{"sequential":0.0,"strided":0.0,"irregular":0.0},"normalized_demand":{"integer":0.125,"floating_point":0.125,"heavy_math":0.6875,"load_store":0.0,"memory_bandwidth":0.0}},"arrays":[],"shared_scalars_read":[],"shared_scalars_written":[],"locks":[]}],"contention_pairs":[{"a":0,"b":1,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":0,"b":2,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":0,"b":3,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":0,"b":4,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":0,"b":5,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":1,"b":2,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":1,"b":3,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":1,"b":4,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":1,"b":5,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":2,"b":3,"score":54.625,"severity":"high","may_run_concurrently":true,"components":{"execution_units":0.3,"load_store":0.375,"cache":1.0,"memory_bandwidth":0.5,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["memory bandwidth: both threads stream data from beyond the L2 cache","L1D capacity: combined footprint 7.6 MiB vs shared L1D 48.0 KiB","execution units: both threads demand floating-point units","load/store ports: both threads are memory-instruction heavy","shared data 'src' (read-only)","shared data 'dst' (at least one writer)"]},{"a":2,"b":4,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":2,"b":5,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":3,"b":4,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":3,"b":5,"score":2.5312,"severity":"low","may_run_concurrently":true,"components":{"execution_units":0.15,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":0.5625,"lock_factor":1.0},"conflicts":[]},{"a":4,"b":5,"score":30.0,"severity":"medium","may_run_concurrently":true,"components":{"execution_units":1.0,"load_store":0.0,"cache":0.0,"memory_bandwidth":0.0,"overlap_factor":1.0,"lock_factor":1.0},"conflicts":["execution units: both threads demand divide/sqrt/math units"]}],"high_contention_pairs":[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]],"mapping":{"strategy_emitted":"optimized","policy":"spread","naive_total":109.25,"optimized_total":5.0625,"worst_total":109.25,"predicted_reduction_vs_naive_percent":95.3661,"emitted":{"algorithm":"exact-dp","predicted_total_contention":5.0625,"cores":[{"core":0,"cpus":[0,4],"threads":[0,4],"pair_score":2.5312,"advice":"low contention: SMT co-location is beneficial"},{"core":1,"cpus":[1,5],"threads":[1,5],"pair_score":2.5312,"advice":"low contention: SMT co-location is beneficial"},{"core":2,"cpus":[2],"threads":[2],"pair_score":0.0,"advice":"thread runs alone on this core"},{"core":3,"cpus":[3],"threads":[3],"pair_score":0.0,"advice":"thread runs alone on this core"}]},"optimized":{"algorithm":"exact-dp","predicted_total_contention":5.0625,"cores":[{"core":0,"cpus":[0,4],"threads":[0,4],"pair_score":2.5312,"advice":"low contention: SMT co-location is beneficial"},{"core":1,"cpus":[1,5],"threads":[1,5],"pair_score":2.5312,"advice":"low contention: SMT co-location is beneficial"},{"core":2,"cpus":[2],"threads":[2],"pair_score":0.0,"advice":"thread runs alone on this core"},{"core":3,"cpus":[3],"threads":[3],"pair_score":0.0,"advice":"thread runs alone on this core"}]},"naive":{"algorithm":"creation-order","predicted_total_contention":109.25,"cores":[{"core":0,"cpus":[0,4],"threads":[0,1],"pair_score":54.625,"advice":"high contention: prefer separate cores if available"},{"core":1,"cpus":[1,5],"threads":[2,3],"pair_score":54.625,"advice":"high contention: prefer separate cores if available"},{"core":2,"cpus":[2],"threads":[4],"pair_score":0.0,"advice":"thread runs alone on this core"},{"core":3,"cpus":[3],"threads":[5],"pair_score":0.0,"advice":"thread runs alone on this core"}]}},"warnings":[]},"gen":"/* ===================================================================\n * Generated by HT-Compass 1.0.0 from tests/loop_threads.c (2026-10-24 14:56)\n * Mapping strategy: optimized (exact-dp), policy: spread\n * Predicted contention of this mapping: 5.1\n *   core 0 (CPU 0 4): T0 streamer#0 + T4 cruncher#0\n *   core 1 (CPU 1 5): T1 streamer#1 + T5 cruncher#1\n *   core 2 (CPU 2): T2 streamer#2\n *   core 3 (CPU 3): T3 streamer#3\n * ================================================================== */\n#ifndef _GNU_SOURCE\n#define _GNU_SOURCE\n#endif\n#include <stdio.h>\n#include <pthread.h>\n#include <math.h>\n#define NS 4\n#define NC 2\n#define N  500000\n#include <sched.h>\n\n/* ---- HT-Compass: compile-time thread-to-CPU map ---- */\n#define HT_NUM_THREADS 6\nstatic const int __ht_cpu_map[HT_NUM_THREADS] = { 0, 1, 2, 3, 4, 5 };\n\nstatic int __ht_create(pthread_t *t, void *(*fn)(void *), void *arg, int idx)\n{\n    /* Pin the new thread via its attribute so it never runs on another CPU. */\n    if (idx >= 0 && idx < HT_NUM_THREADS && __ht_cpu_map[idx] >= 0 &&\n        __ht_cpu_map[idx] < CPU_SETSIZE) {\n        pthread_attr_t attr;\n        cpu_set_t set;\n        int rc = -1;\n        CPU_ZERO(&set);\n        CPU_SET(__ht_cpu_map[idx], &set);\n        pthread_attr_init(&attr);\n        if (pthread_attr_setaffinity_np(&attr, sizeof(set), &set) == 0)\n            rc = pthread_create(t, &attr, fn, arg);\n        pthread_attr_destroy(&attr);\n        if (rc == 0) return 0;\n    }\n    return pthread_create(t, NULL, fn, arg);   /* CPU absent: run unpinned */\n}\n\n/* ---- forward declarations ---- */\nvoid *streamer(void *arg);\nvoid *cruncher(void *arg);\n\n/* ---- program ---- */\ndouble src[500000];\ndouble dst[500000];\ndouble acc[2];\npthread_t streamers[4];\npthread_t crunchers[2];\n\nvoid *streamer(void *arg) {\n    int i;\n    for (i = 0; i < 500000; i++) {\n        dst[i] = src[i] * 1.5 + dst[i];\n    }\n    return NULL;\n}\n\nvoid *cruncher(void *arg) {\n    double s = 1.0;\n    int i;\n    for (i = 1; i < 2000000; i++) {\n        s += sqrt(i) / (s + 1.0);\n    }\n    printf(\"cruncher %f\\n\", s);\n    return NULL;\n}\n\nint main(void) {\n    int i;\n    for (i = 0; i < 500000; i++) {\n        src[i] = 1.0;\n    }\n    for (i = 0; i < 4; i++) {\n        __ht_create(&streamers[i], streamer, NULL, i);\n    }\n    for (i = 0; i < 2; i++) {\n        __ht_create(&crunchers[i], cruncher, NULL, 4 + i);\n    }\n    for (i = 0; i < 4; i++) {\n        pthread_join(streamers[i], NULL);\n    }\n    for (i = 0; i < 2; i++) {\n        pthread_join(crunchers[i], NULL);\n    }\n    printf(\"done %f\\n\", dst[7]);\n    return 0;\n}\n","source":"/* loop_threads.c - threads created in 'for' loops with constant bounds.\n * 4 instances of a streaming worker + 2 instances of a math-heavy worker. */\n#include <stdio.h>\n#include <pthread.h>\n#include <math.h>\n\n#define NS 4\n#define NC 2\n#define N  500000\n\ndouble src[N];\ndouble dst[N];\ndouble acc[2];\n\npthread_t streamers[NS];\npthread_t crunchers[NC];\n\nvoid *streamer(void *arg)\n{\n    int i;\n    for (i = 0; i < N; i++) {\n        dst[i] = src[i] * 1.5 + dst[i];\n    }\n    return NULL;\n}\n\nvoid *cruncher(void *arg)\n{\n    double s = 1.0;\n    int i;\n    for (i = 1; i < 2000000; i++) {\n        s += sqrt(i) / (s + 1.0);\n    }\n    printf(\"cruncher %f\\n\", s);\n    return NULL;\n}\n\nint main(void)\n{\n    int i;\n    for (i = 0; i < N; i++) {\n        src[i] = 1.0;\n    }\n    for (i = 0; i < NS; i++) {\n        pthread_create(&streamers[i], NULL, streamer, NULL);\n    }\n    for (i = 0; i < NC; i++) {\n        pthread_create(&crunchers[i], NULL, cruncher, NULL);\n    }\n    for (i = 0; i < NS; i++) {\n        pthread_join(streamers[i], NULL);\n    }\n    for (i = 0; i < NC; i++) {\n        pthread_join(crunchers[i], NULL);\n    }\n    printf(\"done %f\\n\", dst[7]);\n    return 0;\n}\n"}}</script>
+<script>
+"use strict";
+/* ====================================================================
+   HT-Compass dashboard. Reads program.htmeta.json produced by htcompiler.
+   ==================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const SAMPLES = JSON.parse($("#samples").textContent);
+
+const state = {
+  report: null, gen: null, source: null,
+  mapKey: "optimized", sel: null, codeTab: "gen",
+  server: { ok: false, version: "", error: "" },
+};
+
+/* ---------- formatting ---------- */
+const fmtScore = (x) => (Math.round(x * 10) / 10).toFixed(1);
+function fmtOps(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + " billion";
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e8 ? 0 : 1) + " million";
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + " thousand";
+  return String(Math.round(n));
+}
+function fmtBytes(b) {
+  if (b >= 1048576) return (b / 1048576).toFixed(1) + " MiB";
+  if (b >= 1024) return (b / 1024).toFixed(1) + " KiB";
+  return Math.round(b) + " B";
+}
+const baseName = (p) => String(p || "").split(/[\\/]/).pop();
+
+/* ---------- colour ---------- */
+const RAMP = [[0, [247, 236, 196]], [15, [244, 200, 110]], [35, [240, 150, 60]], [60, [209, 73, 91]], [100, [107, 18, 55]]];
+function heat(score) {
+  const s = Math.max(0, Math.min(100, score));
+  let i = 1;
+  while (i < RAMP.length - 1 && s > RAMP[i][0]) i++;
+  const [s0, c0] = RAMP[i - 1], [s1, c1] = RAMP[i], t = (s - s0) / (s1 - s0);
+  const c = c0.map((v, k) => Math.round(v + (c1[k] - v) * t));
+  const lum = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+  return { bg: `rgb(${c[0]},${c[1]},${c[2]})`, fg: lum > 0.55 ? "#16263A" : "#FFFFFF" };
+}
+function classInfo(k) {
+  k = k || "";
+  if (/latency/.test(k)) return { color: "#7A5BB0", short: "latency-bound" };
+  if (/memory/.test(k)) return { color: "#3A6EA5", short: "memory-bound" };
+  if (/math|div/.test(k)) return { color: "#1F8A8A", short: "math-heavy" };
+  if (/floating/.test(k)) return { color: "#5E9442", short: "FP compute" };
+  if (/cache/.test(k)) return { color: "#A8742C", short: "cache-resident" };
+  if (/integer/.test(k)) return { color: "#7A8798", short: "integer compute" };
+  return { color: "#7A8798", short: k || "idle" };
+}
+
+/* ---------- report helpers ---------- */
+const thr = (id) => state.report.threads[id];
+const thName = (id) => thr(id).name;
+function pairOf(a, b) {
+  if (a > b) [a, b] = [b, a];
+  return state.report.contention_pairs.find((p) => p.a === a && p.b === b) || null;
+}
+const model = () => state.report.model || { weights: { execution_units: .30, load_store: .15, cache: .25, memory_bandwidth: .30 }, severity_thresholds: { high: 35, medium: 15 } };
+function sevWord(score) {
+  const t = model().severity_thresholds;
+  return score >= t.high ? "high" : score >= t.medium ? "medium" : "low";
+}
+const mapping = (key) => state.report.mapping[key] || state.report.mapping.optimized;
+function placement(mp) {
+  const m = {};
+  (mp.cores || []).forEach((g) => g.threads.forEach((t, i) => {
+    m[t] = { core: g.core, cpu: g.cpus[i], mate: g.threads.length > 1 ? g.threads[1 - i] : null, score: g.pair_score };
+  }));
+  return m;
+}
+
+/* ====================================================================
+   Loading
+   ==================================================================== */
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 4200);
+}
+function validReport(o) {
+  return o && o.tool === "HT-Compass" && Array.isArray(o.threads) && Array.isArray(o.contention_pairs) && o.mapping && o.topology;
+}
+function loadReport(report, opts = {}) {
+  if (!validReport(report)) { toast("That file is not an HT-Compass report. Create one with htcompiler --json."); return false; }
+  state.report = report;
+  state.gen = opts.gen !== undefined ? opts.gen : state.gen;
+  if (opts.source !== undefined) state.source = opts.source;
+  state.mapKey = "optimized";
+  state.codeTab = state.gen ? "gen" : "json";
+  state.sel = defaultSelection();
+  $("#srcName").textContent = baseName(report.input_file);
+  $("#empty").hidden = true;
+  $("#app").hidden = false;
+  renderAll(false);
+  window.scrollTo({ top: 0 });
+  return true;
+}
+function defaultSelection() {
+  const ps = state.report.contention_pairs.filter((p) => p.may_run_concurrently);
+  const list = ps.length ? ps : state.report.contention_pairs;
+  if (!list.length) return null;
+  const top = list.reduce((m, p) => (p.score > m.score ? p : m), list[0]);
+  return { a: top.a, b: top.b };
+}
+function loadSample(key) {
+  const s = SAMPLES[key];
+  if (s) loadReport(s.report, { gen: s.gen, source: s.source });
+}
+async function handleFiles(files) {
+  let report = null, gen = null, source = null;
+  for (const f of files) {
+    const text = await f.text();
+    if (/\.json$/i.test(f.name)) {
+      try { report = JSON.parse(text); } catch { toast(f.name + " is not valid JSON."); return; }
+    } else if (/Generated by HT-Compass/.test(text)) gen = text;
+    else source = text;
+  }
+  if (report) loadReport(report, { gen, source: source === null ? undefined : source });
+  else if (gen) { state.gen = gen; if (state.report) { state.codeTab = "gen"; renderCode(); } toast("Generated code loaded. Open the report to see the analysis."); }
+  else if (source !== null) { $("#src").value = source; openAnalyze(); }
+}
+
+/* ====================================================================
+   Rendering
+   ==================================================================== */
+function renderAll(animate) {
+  renderHero();
+  renderBoard(animate);
+  renderThreads();
+  renderMatrix();
+  renderDetail();
+  renderRanked();
+  renderOpt();
+  renderAi();
+  renderTopology();
+  renderCode();
+}
+
+function renderHero() {
+  const r = state.report, mp = mapping(state.mapKey), n = r.threads.length;
+  const used = new Set((mp.cores || []).map((g) => g.core)).size;
+  $("#heroTitle").textContent = n === 0 ? "No threads found in this program"
+    : `${n} thread${n === 1 ? "" : "s"} placed on ${used} of ${r.topology.cores} core${r.topology.cores === 1 ? "" : "s"}`;
+  const m = r.mapping, opt = m.optimized_total, nai = m.naive_total, val = mp.predicted_total_contention;
+  let sub;
+  if (n < 2) sub = "A single thread has nothing to share a core with, so no contention is predicted.";
+  else if (nai <= 0 && opt <= 0) sub = "No pair of threads is predicted to interfere, so every pairing is equally good.";
+  else if (state.mapKey === "optimized") {
+    sub = nai > opt
+      ? `Compared with pairing threads in creation order, this placement lowers predicted contention by ${Math.round(m.predicted_reduction_vs_naive_percent)}%.`
+      : "Creation-order pairing already matches the best placement for this program.";
+  } else if (state.mapKey === "naive") {
+    sub = `Pairing threads in creation order predicts ${fmtScore(val)}, against ${fmtScore(opt)} for the optimized placement.`;
+  } else {
+    sub = `This is the mapping written into the generated program (strategy: ${m.strategy_emitted}). It predicts ${fmtScore(val)}, against ${fmtScore(opt)} for the optimized placement.`;
+  }
+  $("#heroSub").textContent = sub;
+
+  const top = Math.max(m.naive_total, m.optimized_total, m.worst_total, 1);
+  const cur = state.mapKey === "emitted" ? m.strategy_emitted : state.mapKey;
+  const rows = [["naive", "Creation order", m.naive_total], ["optimized", "Optimized", m.optimized_total], ["worst", "Worst case", m.worst_total]];
+  $("#strip").innerHTML = rows.map(([k, label, v]) =>
+    `<div class="strip-row ${k === cur ? "cur" : ""}" role="listitem"><span>${label}</span><span class="bar"><i style="width:${(v / top) * 100}%"></i></span><span class="num">${fmtScore(v)}</span></div>`).join("");
+
+  const tabs = [["optimized", "Optimized"], ["naive", "Creation order"]];
+  if (m.strategy_emitted !== "optimized") tabs.push(["emitted", `As emitted (${m.strategy_emitted})`]);
+  $("#mapTabs").innerHTML = tabs.map(([k, label]) =>
+    `<button role="tab" data-map="${k}" aria-selected="${k === state.mapKey}" tabindex="${k === state.mapKey ? 0 : -1}">${label}</button>`).join("");
+  $("#mapMeta").textContent = `Policy ${m.policy}, solved with ${mp.algorithm}. Predicted contention ${fmtScore(mp.predicted_total_contention)}.`;
+}
+
+/* --- core board with FLIP animation between mappings --- */
+function tileRects() {
+  const o = {};
+  document.querySelectorAll("#board .tile[data-t]").forEach((e) => (o[e.dataset.t] = e.getBoundingClientRect()));
+  return o;
+}
+function tileHTML(t) {
+  const th = thr(t), ci = classInfo(th.class), sel = state.sel && (state.sel.a === t || state.sel.b === t);
+  return `<button class="tile ${sel ? "sel" : ""}" data-t="${t}" style="--c:${ci.color}" aria-label="Thread ${t}, ${esc(th.name)}, ${esc(ci.short)}">
+    <span class="tid">T${t}</span><span class="tname">${esc(th.name)}</span><span class="tcls">${esc(ci.short)}</span></button>`;
+}
+function renderBoard(animate) {
+  const prev = animate ? tileRects() : null;
+  const r = state.report, mp = mapping(state.mapKey), topo = r.topology;
+  const byCore = new Map();
+  (mp.cores || []).forEach((g) => { if (!byCore.has(g.core)) byCore.set(g.core, []); byCore.get(g.core).push(g); });
+  const count = Math.min(Math.max(topo.cores, [...byCore.keys()].reduce((m, k) => Math.max(m, k + 1), 0)), 32);
+  let html = "";
+  for (let c = 0; c < count; c++) {
+    const sib = (topo.core_siblings || [])[c] || [];
+    const cpuTxt = sib.length > 1 ? `CPUs ${sib[0]} and ${sib[1]}` : sib.length ? `CPU ${sib[0]}` : "";
+    if (!byCore.has(c)) {
+      html += `<div class="core idle"><header><strong>Core ${c}</strong><span>${cpuTxt}</span></header><p class="none">Not used</p></div>`;
+      continue;
+    }
+    const rows = byCore.get(c).map((g) => {
+      const [a, b] = g.threads;
+      const slotA = `<div class="slot"><div class="cpu">CPU ${g.cpus[0]}</div>${tileHTML(a)}</div>`;
+      let link, slotB;
+      if (b !== undefined) {
+        const col = heat(g.pair_score).bg, isSel = state.sel && ((state.sel.a === a && state.sel.b === b) || (state.sel.a === b && state.sel.b === a));
+        link = `<button class="link ${isSel ? "sel" : ""}" data-a="${a}" data-b="${b}" style="--hc:${col}" aria-label="Contention between ${esc(thName(a))} and ${esc(thName(b))}: ${fmtScore(g.pair_score)}, ${sevWord(g.pair_score)}"><b>${fmtScore(g.pair_score)}</b><small>${sevWord(g.pair_score)}</small></button>`;
+        slotB = `<div class="slot"><div class="cpu">CPU ${g.cpus[1]}</div>${tileHTML(b)}</div>`;
+      } else {
+        link = `<span class="link alone"><b>alone</b></span>`;
+        const other = sib.length > 1 ? sib[1] : null;
+        slotB = `<div class="slot empty-slot"><div class="cpu">${other !== null ? "CPU " + other : "&nbsp;"}</div><div class="tile"><span class="tname">Idle sibling</span><span class="tcls">no thread assigned</span></div></div>`;
+      }
+      return `<div class="pairrow">${slotA}${link}${slotB}</div>`;
+    }).join("");
+    html += `<div class="core"><header><strong>Core ${c}</strong><span>${cpuTxt}</span></header>${rows}</div>`;
+  }
+  $("#board").innerHTML = html;
+
+  if (prev && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll("#board .tile[data-t]").forEach((e) => {
+      const p = prev[e.dataset.t];
+      if (!p) return;
+      const n = e.getBoundingClientRect(), dx = p.left - n.left, dy = p.top - n.top;
+      if (Math.abs(dx) + Math.abs(dy) < 2) return;
+      e.animate([{ transform: `translate(${dx}px,${dy}px)`, zIndex: 5 }, { transform: "none", zIndex: 5 }],
+        { duration: 460, easing: "cubic-bezier(.2,.75,.2,1)" });
+    });
+  }
+}
+
+/* --- threads table --- */
+function renderThreads() {
+  const r = state.report, pl = placement(mapping(state.mapKey));
+  let html = `<thead><tr><th>Thread</th><th>Behaviour</th><th class="num">Operations</th><th>Demand</th><th class="num">Data touched</th><th>Placement</th></tr></thead><tbody>`;
+  r.threads.forEach((t) => {
+    const ci = classInfo(t.class), d = (t.profile || {}).normalized_demand || {}, p = pl[t.id];
+    const vals = [d.integer, d.floating_point, d.heavy_math, d.load_store, d.memory_bandwidth].map((v) => Math.max(0, Math.min(1, v || 0)));
+    const labels = ["integer", "floating-point", "divide/math", "load/store", "memory traffic"];
+    const aria = vals.map((v, i) => `${labels[i]} ${Math.round(v * 100)}%`).join(", ");
+    const sel = state.sel && (state.sel.a === t.id || state.sel.b === t.id);
+    html += `<tr class="${sel ? "sel" : ""}"><td><span class="tid">T${t.id}</span><strong>${esc(t.name)}</strong></td>
+      <td><span class="dot" style="--c:${ci.color}"></span>${esc(t.class)}</td>
+      <td class="num">${fmtOps((t.profile || {}).total_ops || 0)}</td>
+      <td><span class="demand" role="img" aria-label="${aria}" title="${aria}">${vals.map((v) => `<i style="height:${Math.max(2, v * 30)}px"></i>`).join("")}</span></td>
+      <td class="num">${fmtBytes((t.profile || {}).working_set_bytes || 0)}</td>
+      <td>${p ? `Core ${p.core}, CPU ${p.cpu}${p.mate !== null ? ", with " + esc(thName(p.mate)) : ", alone"}` : "No placement"}</td></tr>`;
+  });
+  $("#threadTbl").innerHTML = html + "</tbody>";
+}
+
+/* --- heat matrix --- */
+function renderMatrix() {
+  const r = state.report, n = r.threads.length;
+  $("#secMatrix").hidden = $("#secRanked").hidden = n < 2;
+  if (n < 2) return;
+  const pl = placement(mapping(state.mapKey));
+  const cs = n <= 8 ? 54 : n <= 16 ? 40 : 24, showNum = n <= 16;
+  const mx = $("#matrix");
+  mx.style.setProperty("--cs", cs + "px");
+  mx.style.gridTemplateColumns = `auto repeat(${n}, ${cs}px)`;
+  let html = `<div></div>` + r.threads.map((t) => `<div class="ch">T${t.id}</div>`).join("");
+  for (let i = 0; i < n; i++) {
+    html += `<div class="rh" title="${esc(thName(i))}"><b>T${i}</b>${esc(thName(i))}</div>`;
+    for (let j = 0; j < n; j++) {
+      if (i === j) { html += `<div class="cell diag" aria-hidden="true"></div>`; continue; }
+      const p = pairOf(i, j), together = pl[i] && pl[j] && pl[i].core === pl[j].core;
+      const sel = state.sel && ((state.sel.a === i && state.sel.b === j) || (state.sel.a === j && state.sel.b === i));
+      let style = "", cls = "cell", txt = "";
+      if (!p.may_run_concurrently) { cls += " never"; txt = showNum ? "–" : ""; }
+      else if (p.score >= 0.05) { const h = heat(p.score); style = `background:${h.bg};color:${h.fg}`; txt = showNum ? Math.round(p.score) : ""; }
+      else txt = showNum ? "0" : "";
+      if (together) cls += " placed";
+      if (sel) cls += " sel";
+      html += `<button class="${cls}" style="${style}" data-a="${i}" data-b="${j}" aria-label="${esc(thName(i))} with ${esc(thName(j))}: ${p.may_run_concurrently ? fmtScore(p.score) : "never run at the same time"}">${txt}</button>`;
+    }
+  }
+  mx.innerHTML = html;
+  const t = model().severity_thresholds;
+  const stops = RAMP.map(([s, c]) => `rgb(${c.join(",")}) ${s}%`).join(",");
+  $("#legend").innerHTML = `<span><i class="ramp" style="display:inline-block;vertical-align:middle;background:linear-gradient(90deg,${stops})"></i>
+      0 to 100 (medium from ${t.medium}, high from ${t.high})</span>
+    <span><i class="sw" style="box-shadow:inset 0 0 0 3px var(--ink);background:var(--cell-zero)"></i>placed on the same core in this view</span>
+    <span><i class="sw" style="background:repeating-linear-gradient(135deg,var(--cell-zero) 0 4px,var(--line) 4px 5px)"></i>never run at the same time</span>`;
+}
+
+/* --- detail panel --- */
+const COMP = [
+  ["execution_units", "Execution units", "Both threads keep the same arithmetic units busy."],
+  ["load_store", "Load and store ports", "Both issue many loads and stores."],
+  ["cache", "Shared L1 cache", "Their data together is larger than the L1 cache the two sibling threads share."],
+  ["memory_bandwidth", "Memory bandwidth", "Both pull a lot of data from main memory."],
+];
+function renderDetail() {
+  const box = $("#detail"), s = state.sel;
+  if (!s) { box.innerHTML = state.report.threads.length < 2 ? "" : `<p class="note">Select a cell in the matrix.</p>`; return; }
+  const p = pairOf(s.a, s.b);
+  if (!p) { box.innerHTML = ""; return; }
+  const w = model().weights, comp = p.components, h = heat(p.score).bg;
+  const pl = placement(mapping(state.mapKey)), together = pl[p.a] && pl[p.b] && pl[p.a].core === pl[p.b].core;
+  const rows = COMP.map(([k, label, why]) => {
+    const v = comp[k] || 0, pts = 100 * (w[k] || 0) * v;
+    return `<div class="comp"><div class="l"><span>${label}</span><span>${v.toFixed(2)} × ${(w[k] * 100).toFixed(0)}% = ${pts.toFixed(1)}</span></div>
+      <div class="bar"><i style="width:${v * 100}%"></i></div><p>${why}</p></div>`;
+  }).join("");
+  const sum = COMP.reduce((a, [k]) => a + 100 * (w[k] || 0) * (comp[k] || 0), 0);
+  const calc = p.may_run_concurrently
+    ? `Components add up to <b>${sum.toFixed(1)}</b>. Multiplied by the overlap factor <b>${comp.overlap_factor.toFixed(2)}</b> (how much of both lifetimes they run together) and the lock factor <b>${comp.lock_factor.toFixed(2)}</b>, the score is <b>${fmtScore(p.score)}</b>.`
+    : `These threads are created and joined so that they never run at the same time, so the score is <b>0</b> whatever they do.`;
+  const conf = (p.conflicts || []).map((c) => `<li>${esc(c)}</li>`).join("");
+  box.innerHTML = `<h3>T${p.a} ${esc(thName(p.a))} with T${p.b} ${esc(thName(p.b))}</h3>
+    <div class="score-line" style="--hc:${h}"><span class="big">${fmtScore(p.score)}</span><span class="sev">${p.may_run_concurrently ? p.severity : "none"}</span></div>
+    <p>${together ? "These two share a core in the mapping shown above." : "These two are on different cores in the mapping shown above."}</p>
+    ${p.may_run_concurrently ? rows : ""}
+    <p class="calc">${calc}</p>
+    ${conf ? `<div><h3>What the compiler noticed</h3><ul>${conf}</ul></div>` : ""}`;
+}
+
+/* --- ranked pairs --- */
+function renderRanked() {
+  const pl = placement(mapping(state.mapKey));
+  const list = state.report.contention_pairs.filter((p) => p.may_run_concurrently).sort((a, b) => b.score - a.score).slice(0, 8);
+  $("#ranked").innerHTML = list.length ? list.map((p) => {
+    const sel = state.sel && state.sel.a === p.a && state.sel.b === p.b, together = pl[p.a] && pl[p.b] && pl[p.a].core === pl[p.b].core;
+    return `<button class="${sel ? "sel" : ""}" data-a="${p.a}" data-b="${p.b}"><span>T${p.a} ${esc(thName(p.a))} with T${p.b} ${esc(thName(p.b))}${together ? "<small>same core here</small>" : ""}</span>
+      <span class="bar"><i style="width:${Math.min(100, p.score)}%;background:${heat(p.score).bg}"></i></span><span class="sc">${fmtScore(p.score)}</span></button>`;
+  }).join("") : `<p class="note">No pair of threads can run at the same time.</p>`;
+}
+
+/* --- topology --- */
+function renderTopology() {
+  const r = state.report, t = r.topology, m = model();
+  $("#facts").innerHTML = [
+    ["Cores", `${t.cores} (${t.logical_cpus} logical CPUs)`],
+    ["SMT", t.smt_detected ? "detected" : "not detected"],
+    ["Topology from", t.source],
+    ["L1 data cache", fmtBytes(t.l1d_bytes)],
+    ["L2 cache", fmtBytes(t.l2_bytes)],
+    ["Score weights", `exec ${m.weights.execution_units * 100}%, ld/st ${m.weights.load_store * 100}%, cache ${m.weights.cache * 100}%, memory ${m.weights.memory_bandwidth * 100}%`],
+  ].map(([k, v], i, a) => `<div class="${i === a.length - 1 ? "wide" : ""}"><span>${k}</span><strong>${esc(v)}</strong></div>`).join("");
+  $("#sibs").innerHTML = (t.core_siblings || []).map((s, i) => `<span>Core ${i}: CPU ${s.join(" and ")}</span>`).join("");
+  const w = r.warnings || [];
+  $("#warns").innerHTML = w.length ? `<div class="warn"><strong>Warnings from the compiler</strong><ul>${w.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
+}
+
+/* --- code view --- */
+function codeText() {
+  if (state.codeTab === "gen") return state.gen;
+  if (state.codeTab === "json") return JSON.stringify(state.report, null, 2);
+  return state.source;
+}
+function renderCode() {
+  const tabs = [];
+  if (state.gen) tabs.push(["gen", "Generated C"]);
+  tabs.push(["json", "Report JSON"]);
+  if (state.source) tabs.push(["src", "Your source"]);
+  if (!tabs.some((t) => t[0] === state.codeTab)) state.codeTab = tabs[0][0];
+  $("#codeTabs").innerHTML = tabs.map(([k, l]) => `<button role="tab" data-code="${k}" aria-selected="${k === state.codeTab}">${l}</button>`).join("");
+  const text = codeText() || "";
+  const hl = state.codeTab === "gen" ? /__ht_/ : null;
+  $("#codeWrap").innerHTML = `<pre><code>${text.split("\n").map((l) => `<span class="ln${hl && hl.test(l) ? " hl" : ""}">${esc(l) || " "}</span>`).join("")}</code></pre>`;
+  $("#codeNote").hidden = !!state.gen;
+}
+function download(name, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+
+/* ====================================================================
+   Code changes (optimizer report)
+   ==================================================================== */
+const TR_TITLE = { interchange: "Loop interchange", fusion: "Loop fusion", promotion: "Keep a value in a register" };
+const ST_WORD = { applied: "Applied", passed: "Passed (another change went first)", rejected: "Rejected", skipped: "Skipped",
+                  reverted: "Reverted", found: "Found" };
+
+function diffLines(a, b) {
+  const x = a.split("\n"), y = b.split("\n"), n = x.length, m = y.length;
+  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = x[i] === y[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (x[i] === y[j]) { out.push([" ", x[i]]); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) out.push(["-", x[i++]]);
+    else out.push(["+", y[j++]]);
+  }
+  while (i < n) out.push(["-", x[i++]]);
+  while (j < m) out.push(["+", y[j++]]);
+  return out;
+}
+function diffHTML(before, after) {
+  const d = diffLines(before, after), keep = new Array(d.length).fill(false);
+  d.forEach((l, i) => { if (l[0] !== " ") for (let k = Math.max(0, i - 2); k <= Math.min(d.length - 1, i + 2); k++) keep[k] = true; });
+  let html = "", gap = false;
+  d.forEach((l, i) => {
+    if (!keep[i]) { gap = true; return; }
+    if (gap) { html += `<span class="l gap">…</span>`; gap = false; }
+    html += `<span class="l ${l[0] === "+" ? "add" : l[0] === "-" ? "del" : ""}">${esc(l[0] + " " + l[1])}</span>`;
+  });
+  return html;
+}
+const fmtCount = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e8 ? 0 : 1) + " million" : n >= 1e3 ? (n / 1e3).toFixed(0) + " thousand" : String(Math.round(n));
+
+function optItem(c) {
+  const caught = /DIFFERENTIAL TEST FAILED/.test(c.reason || "");
+  const cls = caught ? "caught" : c.status;
+  const word = caught ? "Caught by testing" : (ST_WORD[c.status] || c.status);
+  const rows = [];
+  if (c.legality_evidence) rows.push(["Why it is safe", c.legality_evidence]);
+  if (c.reason && c.status !== "applied" && c.status !== "passed") rows.push([caught ? "What went wrong" : "Why not", c.reason]);
+  if (c.safety && c.safety !== "-") rows.push(["Safety class", c.safety === "exact" ? "exact: the results are identical" : c.safety === "fp-reassoc" ? "changes floating-point rounding" : "not provably safe"]);
+  if (c.differential_test && c.differential_test.note) rows.push(["Tested", c.differential_test.note]);
+  if (c.benchmark) {
+    const b = c.benchmark;
+    rows.push(["Measured", `${b.speedup.toFixed(2)}× ${b.speedup >= 1.005 ? "faster" : b.speedup <= 0.995 ? "(slower)" : "(no change)"}; ${b.baseline_seconds.toFixed(3)} s to ${b.candidate_seconds.toFixed(3)} s, best of ${b.runs}, median ${b.speedup_median.toFixed(2)}×`]);
+  } else if (c.decided_by === "model") rows.push(["Decided by", "the cost model (the program was too brief to time)"]);
+  if (c.model) {
+    const a = c.model.before, z = c.model.after;
+    const cont = (a.predicted_contention || z.predicted_contention) ? `, predicted contention ${fmtScore(a.predicted_contention)} to ${fmtScore(z.predicted_contention)}` : "";
+    rows.push(["Cost model", `memory lines ${fmtCount(a.estimated_dram_lines)} to ${fmtCount(z.estimated_dram_lines)}, operations ${fmtCount(a.operations)} to ${fmtCount(z.operations)}${cont}`]);
+  }
+  const code = c.code ? `<details><summary>Show the code change</summary><div class="diff" tabindex="0">${diffHTML(c.code.before, c.code.after)}</div></details>` : "";
+  return `<article class="opt-item st-${cls}">
+    <header><span class="chip">${word}</span><strong>${esc(TR_TITLE[c.transformation] || c.transformation)}</strong>
+      <span class="where">in ${esc(c.function)}, line ${c.line}${c.suggested_by_advice ? ", suggested by advice" : ""}</span></header>
+    <p>${esc(c.description)}</p>
+    ${c.explanation ? `<p>${esc(c.explanation)}</p>` : ""}
+    ${rows.length ? `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}
+    ${code}</article>`;
+}
+
+function renderOpt() {
+  const sec = $("#secOpt"), o = state.report.optimization;
+  sec.hidden = !o;
+  if (!o) return;
+  const cands = o.candidates || [], applied = cands.filter((c) => c.status === "applied");
+  const others = cands.filter((c) => c.status !== "applied");
+  $("#optLede").textContent = o.plan_only
+    ? "Planning only: these are the opportunities the compiler found and whether each is provably safe. Nothing was built or run."
+    : applied.length
+      ? `${applied.length} change${applied.length === 1 ? "" : "s"} made. Each had to be provably safe${o.settings.differential_test ? ", give the same results when run" : ""}${o.settings.benchmark_selection ? ", and be measurably faster" : ""}.`
+      : "No change passed every check, so the program is used as written.";
+  const facts = [["Changes applied", String(o.applied)]];
+  if (o.end_to_end_timing) {
+    const t = o.end_to_end_timing;
+    facts.push(["Measured end to end", `${t.original_seconds.toFixed(3)} s to ${t.optimized_seconds.toFixed(3)} s (${t.speedup.toFixed(2)}×)`]);
+  }
+  if (o.model_before && !o.plan_only) facts.push(["Predicted memory traffic", `${fmtCount(o.model_before.estimated_dram_lines)} to ${fmtCount(o.model_after.estimated_dram_lines)} lines`]);
+  facts.push(["Checked by", o.plan_only ? "dependence analysis only"
+    : [ "dependence analysis", o.settings.differential_test ? `${o.settings.random_data_seeds + 1} test runs` : null, o.settings.benchmark_selection ? "timing" : "cost model" ].filter(Boolean).join(", ")]);
+  $("#optFacts").innerHTML = facts.map(([k, v]) => `<div><span>${k}</span><strong>${esc(v)}</strong></div>`).join("");
+  $("#optApplied").innerHTML = applied.map(optItem).join("");
+  $("#optApplied").style.display = applied.length ? "" : "none";
+  $("#optOthers").hidden = !others.length;
+  $("#optOthers").open = !applied.length && others.length > 0 && others.length <= 6;
+  $("#optOthersSum").textContent = `${others.length} other opportunit${others.length === 1 ? "y" : "ies"} examined (rejected, skipped or deferred)`;
+  $("#optOthersList").innerHTML = others.map(optItem).join("");
+  $("#optNote").textContent = (o.note ? o.note + " " : "") +
+    "Safety rests on the dependence analysis, which refuses whenever it cannot prove an order is preserved. The test runs are a second check: they show the two programs agree on those inputs, not on every possible input.";
+  const hasSrc = !!(state.source || $("#src").value);
+  $("#advice").hidden = !hasSrc;
+}
+
+
+/* ====================================================================
+   AI optimization panel (local language model through Ollama)
+   ==================================================================== */
+const STATUS_RANK = { applied: 6, passed: 5, rejected: 4, found: 3, unsupported: 2, invalid: 2, skipped: 1 };
+const pillStatus = (c) => `<span class="pill ${c.status === "applied" ? "applied" : ""}">${esc(ST_WORD[c.status] || (c.status === "unsupported" ? "Unsupported" : c.status === "invalid" ? "Invalid" : c.status))}</span>`;
+
+function proposalRows(o) {
+  const byRank = new Map();
+  (o.candidates || []).forEach((c) => {
+    const r = c.model_proposal && c.model_proposal.rank;
+    if (!r) return;
+    const cur = byRank.get(r);
+    if (!cur || (STATUS_RANK[c.status] || 0) > (STATUS_RANK[cur.status] || 0)) byRank.set(r, c);
+  });
+  return [...byRank.entries()].sort((a, b) => a[0] - b[0]);
+}
+
+function renderAi() {
+  const el = $("#aiPanel"), o = state.report.optimization;
+  if (!o || !o.ai || o.ai.mode === "none") { el.hidden = true; return; }
+  const a = o.ai;
+  el.hidden = false;
+  el.className = "ai-panel" + (a.failed ? " fail" : "");
+  if (a.mode === "offline-rules") {
+    el.innerHTML = `<div class="ai-head"><h3>AI optimization</h3><span class="badge off">Not used: offline rules</span></div>
+      <p>This run used the compiler's own finders. No language model was consulted. Run with the local AI option (or <code>./htcompiler prog.c --optimize</code>) to let a local model propose optimizations.</p>`;
+    return;
+  }
+  const mock = a.mode.startsWith("reply-file");
+  const rows = proposalRows(o);
+  const badge = mock ? `<span class="badge mock">TEST REPLY from a file, not real inference</span>` : `<span class="badge live">Local model (Ollama on this machine)</span>`;
+  const r = a.response || {}, q = a.request || {}, p = a.proposals || {};
+  const stats = [
+    ["Model", mock ? "(none: fixture file)" : a.model],
+    ["Service", mock ? "-" : `Ollama ${a.ollama_version || "?"} at ${a.endpoint}`],
+    ["Prompt", `${(q.prompt_characters || 0).toLocaleString()} characters${r.prompt_tokens ? `, ${r.prompt_tokens} tokens` : ""}`],
+    ["Reply", `${(r.characters || 0).toLocaleString()} characters${r.generated_tokens ? `, ${r.generated_tokens} tokens` : ""}, ${(r.seconds || 0).toFixed(1)} s${r.cut_off_at_token_limit ? ", CUT OFF" : ""}`],
+    ["Proposals", `${p.total || 0} (${p.supported || 0} supported, ${p.unsupported || 0} unsupported, ${p.invalid || 0} invalid, ${p.duplicate || 0} duplicate)`],
+    ["Matched a place in the program", String(p.matched_a_site || 0)],
+  ];
+  const notes = (a.validation_notes || []).map((n) => `<li>${esc(n)}</li>`).join("");
+  const rowHtml = rows.map(([rank, c]) => {
+    const m = c.model_proposal, implemented = c.status !== "unsupported" && c.transformation && !/^(tiling|parallelization|strength_reduction|redundant)/.test(c.transformation) && c.status !== "invalid";
+    const d = [];
+    if (m.explanation) d.push(["The model's reason", m.explanation]);
+    if (m.expected_benefit) d.push(["Expected benefit", m.expected_benefit]);
+    if (m.preconditions) d.push(["Preconditions it named", m.preconditions]);
+    if (m.risks) d.push(["Risks it named", m.risks]);
+    if (c.status === "unsupported" || c.status === "invalid") d.push(["Compiler's verdict", c.reason || ""]);
+    else {
+      d.push(["Safety check", c.safety === "exact" ? "proved safe: the results are identical" : c.safety === "fp-reassoc" ? "legal but changes floating-point rounding" : c.safety === "refused" ? "refused: not provably safe" : c.safety]);
+      if (c.legality_evidence) d.push(["Proof", c.legality_evidence]);
+      if (c.differential_test) d.push(["Differential test", `${c.differential_test.passed ? "passed" : "FAILED"}: ${c.differential_test.note}`]);
+      if (c.benchmark) d.push(["Benchmark", `${c.benchmark.speedup.toFixed(2)}× (${c.benchmark.baseline_seconds.toFixed(3)} s to ${c.benchmark.candidate_seconds.toFixed(3)} s, best of ${c.benchmark.runs})`]);
+      if (c.reason && c.status !== "applied" && c.status !== "passed") d.push(["Why not applied", c.reason]);
+    }
+    return `<article class="ai-prop"><div class="top"><span class="rank">${rank}</span><strong>${esc(TR_TITLE[c.transformation] || c.transformation)}</strong>
+      <span class="region">${esc(c.region || "no region")}${c.function ? " in " + esc(c.function) : ""}</span>
+      ${c.status === "invalid" ? `<span class="pill">invalid proposal</span>` : `<span class="pill ${implemented ? "yes" : "no"}">${implemented ? "implemented" : "no implementation"}</span>`}${pillStatus(c)}</div>
+      <dl>${d.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl></article>`;
+  }).join("");
+  el.innerHTML = `<div class="ai-head"><h3>AI optimization</h3>${badge}</div>
+    <div class="ai-stats">${stats.map(([k, v]) => `<div><span>${k}</span><strong>${esc(v)}</strong></div>`).join("")}</div>
+    ${notes ? `<ul class="ai-notes">${notes}</ul>` : ""}
+    ${rows.length ? `<div class="ai-props">${rowHtml}</div>` : `<p class="note">The model's reply contained no usable proposals. Every change below was found by the compiler's own rules.</p>`}
+    <details><summary>The model's raw reply${r.cut_off_at_token_limit ? " (cut off)" : ""}</summary><pre class="rawreply">${esc(r.excerpt || "")}</pre></details>
+    <p class="note" style="padding:0">A proposal is only a suggestion. The compiler applied a change only if it proved it safe, the differential test agreed, and it was measurably faster.</p>`;
+}
+
+/* --- local model status (dialog) --- */
+async function refreshLlmStatus() {
+  const line = $("#aiStatusLine");
+  if (!state.server.ok) {
+    line.innerHTML = `<span class="dotc"></span><span>Start the dashboard server (<code>./run.sh</code>) to use the local model.</span>`;
+    return;
+  }
+  try {
+    const st = await (await fetch("api/llm/status", { cache: "no-store" })).json();
+    state.llm = st;
+    const ok = st.ready;
+    line.innerHTML = `<span class="dotc ${ok ? "ok" : "no"}"></span><span>${ok
+      ? `Local model ready: <strong>${esc(st.selected_model)}</strong> (Ollama ${esc(st.service.version)}, ${st.models.length} installed)`
+      : esc(st.message)}</span><button class="btn" type="button" id="btnAiCheck">Check again</button>`;
+    $("#btnAiCheck").onclick = refreshLlmStatus;
+  } catch (e) {
+    line.innerHTML = `<span class="dotc no"></span><span>Could not read the model status: ${esc(e.message)}</span>`;
+  }
+}
+
+/* ====================================================================
+   Events
+   ==================================================================== */
+function select(a, b) { state.sel = { a: Math.min(a, b), b: Math.max(a, b) }; renderBoard(false); renderThreads(); renderMatrix(); renderDetail(); renderRanked(); }
+function selectThread(t) {
+  const pl = placement(mapping(state.mapKey))[t];
+  if (pl && pl.mate !== null) return select(t, pl.mate);
+  const best = state.report.contention_pairs.filter((p) => p.a === t || p.b === t).sort((x, y) => y.score - x.score)[0];
+  if (best) select(best.a, best.b);
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const tab = t.closest("[data-map]");
+  if (tab) { state.mapKey = tab.dataset.map; renderHero(); renderBoard(true); renderThreads(); renderMatrix(); renderDetail(); renderRanked(); $("#mapTabs [aria-selected=true]").focus(); return; }
+  const ct = t.closest("[data-code]");
+  if (ct) { state.codeTab = ct.dataset.code; renderCode(); return; }
+  const pair = t.closest("[data-a][data-b]");
+  if (pair && !pair.classList.contains("diag")) { select(+pair.dataset.a, +pair.dataset.b); return; }
+  const tile = t.closest(".tile[data-t]");
+  if (tile) { selectThread(+tile.dataset.t); return; }
+  const sm = t.closest("[data-sample]");
+  if (sm) loadSample(sm.dataset.sample);
+});
+document.addEventListener("keydown", (e) => {   /* arrow keys move between tabs */
+  const tab = e.target.closest && e.target.closest('[role="tab"]');
+  if (!tab || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+  const all = [...tab.parentElement.querySelectorAll('[role="tab"]')], i = all.indexOf(tab);
+  all[(i + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length].click();
+});
+$("#btnCopy").onclick = () => navigator.clipboard.writeText(codeText() || "").then(() => toast("Copied"), () => toast("Copy failed"));
+$("#btnDl").onclick = () => {
+  const names = { gen: "program_gen.c", json: "program.htmeta.json", src: "program.c" };
+  download(names[state.codeTab], codeText() || "");
+};
+const fileIn = $("#fileIn");
+$("#btnOpen").onclick = $("#btnOpen2").onclick = () => fileIn.click();
+fileIn.onchange = () => { handleFiles([...fileIn.files]); fileIn.value = ""; };
+const sampleSel = $("#sampleSel");
+Object.entries(SAMPLES).forEach(([k, s]) => sampleSel.insertAdjacentHTML("beforeend", `<option value="${k}">${esc(s.title)}</option>`));
+sampleSel.onchange = () => { if (sampleSel.value) loadSample(sampleSel.value); sampleSel.value = ""; };
+
+let dragDepth = 0;
+addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; document.body.classList.add("dragging"); });
+addEventListener("dragover", (e) => e.preventDefault());
+addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dragging"); } });
+addEventListener("drop", (e) => { e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging"); handleFiles([...e.dataTransfer.files]); });
+
+/* ====================================================================
+   Analyze dialog (needs frontend/server.py)
+   ==================================================================== */
+const dlg = $("#dlg"), srcTA = $("#src"), gutter = $("#gutter");
+function drawGutter(errLine) {
+  const n = srcTA.value.split("\n").length;
+  gutter.innerHTML = Array.from({ length: n }, (_, i) => `<span class="${i + 1 === errLine ? "err" : ""}">${i + 1}</span>`).join("");
+  gutter.scrollTop = srcTA.scrollTop;
+}
+srcTA.addEventListener("input", () => drawGutter());
+srcTA.addEventListener("scroll", () => (gutter.scrollTop = srcTA.scrollTop));
+function openAnalyze() {
+  if (!srcTA.value) srcTA.value = (SAMPLES.mixed && SAMPLES.mixed.source) || "";
+  drawGutter();
+  $("#errBox").hidden = true;
+  const note = $("#srvNote");
+  if (state.server.ok) { note.hidden = true; $("#btnRun").disabled = false; }
+  else {
+    note.hidden = false; $("#btnRun").disabled = true;
+    note.innerHTML = location.protocol === "file:"
+      ? `Analyzing needs the local server because a web page cannot run the compiler by itself. Build the compiler with <code>make</code>, run <code>python3 frontend/server.py</code>, and open <code>http://127.0.0.1:8765</code>.`
+      : (state.server.error ? esc(state.server.error) : `The analysis server is not responding. Run <code>python3 frontend/server.py</code> from the project folder.`);
+  }
+  dlg.showModal();
+  refreshLlmStatus();
+}
+$("#btnAnalyze").onclick = openAnalyze;
+$("#dlgClose").onclick = () => dlg.close();
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+function readOptions() {
+  return {
+    policy: $("#optPolicy").value, strategy: $("#optStrategy").value,
+    topology: $("#optTopo").value.trim(), cores: $("#optCores").value.trim(),
+    optimize: $("#optOpt").checked, bench: $("#optBench").checked, fp_reassoc: $("#optFp").checked,
+    ai: $("#optSource").value === "ai",
+  };
+}
+async function callApi(path, body) {
+  const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  return res.json();
+}
+function syncOptBoxes() {
+  const on = $("#optOpt").checked;
+  $("#optBench").disabled = !on; $("#optFp").disabled = !on; $("#optSource").disabled = !on;
+}
+$("#optOpt").addEventListener("change", syncOptBoxes);
+syncOptBoxes();
+
+$("#btnRun").onclick = async () => {
+  const btn = $("#btnRun"), eb = $("#errBox"), opts = readOptions();
+  btn.disabled = true; btn.textContent = opts.optimize ? (opts.ai ? "Asking the local model…" : "Optimizing…") : "Analyzing"; eb.hidden = true; drawGutter();
+  try {
+    const out = await callApi("api/analyze", { source: srcTA.value, ...opts });
+    if (!out.ok && out.ai_unavailable) {
+      eb.innerHTML = `<h4>The local model could not be used, so no AI analysis happened</h4>${esc(out.error).replace(/\n/g, "<br>")}`;
+      eb.hidden = false;
+      refreshLlmStatus();
+    } else if (!out.ok) {
+      eb.textContent = out.error || "The compiler rejected this program."; eb.hidden = false;
+      const m = /line (\d+)/.exec(out.error || "");
+      if (m) {
+        const line = +m[1];
+        drawGutter(line);
+        const lh = parseFloat(getComputedStyle(srcTA).lineHeight) || 20;
+        srcTA.scrollTop = Math.max(0, (line - 4) * lh);
+        gutter.scrollTop = srcTA.scrollTop;
+      }
+    } else {
+      state.lastOpts = opts;
+      dlg.close();
+      loadReport(out.report, { gen: out.generated, source: srcTA.value });
+      toast(opts.optimize ? "Optimization complete" : "Analysis complete");
+    }
+  } catch (err) {
+    eb.textContent = "Could not reach the analysis server: " + err.message; eb.hidden = false;
+  } finally { btn.disabled = !state.server.ok; btn.textContent = "Analyze"; }
+};
+
+/* --- "ask an AI" without an API: prompt out, reply in --- */
+$("#btnPrompt").onclick = async () => {
+  const msg = $("#adviceMsg");
+  if (!state.server.ok) { msg.textContent = "Start the dashboard server (./run.sh) to prepare a prompt, or use htcompiler --export-prompt."; return; }
+  msg.textContent = "Preparing…";
+  const out = await callApi("api/prompt", { source: state.source || srcTA.value, ...(state.lastOpts || {}), optimize: false });
+  if (!out.ok) { msg.textContent = out.error; return; }
+  $("#promptBox").textContent = out.prompt; $("#promptBox").hidden = false; $("#btnCopyPrompt").hidden = false;
+  msg.textContent = "Paste this into any chat AI, then paste its reply below.";
+};
+$("#btnCopyPrompt").onclick = () => navigator.clipboard.writeText($("#promptBox").textContent).then(() => toast("Prompt copied"), () => toast("Copy failed"));
+$("#btnAdvice").onclick = async () => {
+  const msg = $("#adviceMsg"), text = $("#adviceText").value.trim();
+  if (!state.server.ok) { msg.textContent = "Start the dashboard server (./run.sh), or use htcompiler --suggest FILE."; return; }
+  if (!text) { msg.textContent = "Paste the AI's reply first."; return; }
+  msg.textContent = "Checking the advice (this builds and times your program)…";
+  $("#btnAdvice").disabled = true;
+  try {
+    const out = await callApi("api/analyze", { source: state.source || srcTA.value, ...(state.lastOpts || {}), optimize: true, suggestions: text });
+    if (!out.ok) { msg.textContent = out.error; return; }
+    loadReport(out.report, { gen: out.generated, source: state.source });
+    const a = (out.report.optimization || {}).advice;
+    toast(a ? `${a.matched_an_opportunity} of ${a.suggestions_given} suggestions matched an opportunity` : "Done");
+  } catch (err) { msg.textContent = "Could not reach the server: " + err.message; }
+  finally { $("#btnAdvice").disabled = false; }
+};
+
+async function probeServer() {
+  if (location.protocol === "file:") return;
+  try {
+    const r = await fetch("api/health", { cache: "no-store" });
+    const j = await r.json();
+    state.server = { ok: !!j.ok, version: j.compiler || "", error: j.error || "" };
+  } catch { state.server.ok = false; }
+}
+probeServer();
+</script>
+</body>
+</html>
